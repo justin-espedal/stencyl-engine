@@ -1547,6 +1547,17 @@ class Engine
 				removeActor(actor);
 			}
 		}
+
+		for(actorType in Data.get().getAllActorTypes())
+		{
+			if(recycledActorsOfType.get(actorType.ID) != null)
+			{
+				if(recycledActorsOfType.get(actorType.ID).length == 0)
+				{
+					Data.get().unloadSingleActorTypeAtlas(actorType);
+				}
+			}
+		}
 	}
 
 	public function cleanup()
@@ -1795,6 +1806,8 @@ class Engine
 		
 	public function createActor(ai:ActorInstance, offset:Bool = false):Actor
 	{
+		Data.get().loadSingleActorTypeAtlas(ai.actorType);
+
 		var s:com.stencyl.models.actor.Sprite = cast(Data.get().resources.get(ai.actorType.spriteID), com.stencyl.models.actor.Sprite);
 	
 		var a:Actor = new Actor

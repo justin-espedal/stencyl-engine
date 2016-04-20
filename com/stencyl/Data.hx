@@ -318,6 +318,24 @@ class Data
 		
 		return resourceAssets.get(url);
 	}
+
+	public function loadSingleActorTypeAtlas(at:ActorType)
+	{
+		var resource = resources.get(at.spriteID);
+		if(resource != null)
+		{
+			resource.loadGraphics();
+		}
+	}
+
+	public function unloadSingleActorTypeAtlas(at:ActorType)
+	{
+		var resource = resources.get(at.spriteID);
+		if(resource != null)
+		{
+			resource.unloadGraphics();
+		}
+	}	
 	
 	public function loadAtlas(atlasID:Int)
 	{
