@@ -319,6 +319,8 @@ class Data
 		return resourceAssets.get(url);
 	}
 
+	public static var aggresiveMemReclaim = false;
+
 	public function loadSingleActorTypeAtlas(at:ActorType)
 	{
 		var resource = resources.get(at.spriteID);

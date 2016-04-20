@@ -1548,13 +1548,16 @@ class Engine
 			}
 		}
 
-		for(actorType in Data.get().getAllActorTypes())
+		if(Data.aggresiveMemReclaim)
 		{
-			if(recycledActorsOfType.get(actorType.ID) != null)
+			for(actorType in Data.get().getAllActorTypes())
 			{
-				if(recycledActorsOfType.get(actorType.ID).length == 0)
+				if(recycledActorsOfType.get(actorType.ID) != null)
 				{
-					Data.get().unloadSingleActorTypeAtlas(actorType);
+					if(recycledActorsOfType.get(actorType.ID).length == 0)
+					{
+						Data.get().unloadSingleActorTypeAtlas(actorType);
+					}
 				}
 			}
 		}
@@ -1806,7 +1809,8 @@ class Engine
 		
 	public function createActor(ai:ActorInstance, offset:Bool = false):Actor
 	{
-		Data.get().loadSingleActorTypeAtlas(ai.actorType);
+		if(Data.aggresiveMemReclaim)
+			Data.get().loadSingleActorTypeAtlas(ai.actorType);
 
 		var s:com.stencyl.models.actor.Sprite = cast(Data.get().resources.get(ai.actorType.spriteID), com.stencyl.models.actor.Sprite);
 	
