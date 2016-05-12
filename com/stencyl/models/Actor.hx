@@ -2276,6 +2276,11 @@ class Actor extends Sprite
 	{
 		if(isPausable())
 		{
+			Actuate.pause(this);		
+
+			Actuate.pause(tweenAngle);
+			Actuate.pause(tweenLoc);
+			
 			this.paused = true;
 			
 			if(physicsMode == 0)
@@ -2289,6 +2294,11 @@ class Actor extends Sprite
 	{
 		if(isPausable())
 		{
+			Actuate.resume(this);		
+
+			Actuate.resume(tweenAngle);
+			Actuate.resume(tweenLoc);
+			
 			this.paused = false;
 			
 			if(physicsMode == 0)
@@ -3202,8 +3212,8 @@ class Actor extends Sprite
 		
 		if(isHUD)
 		{
-			mx = Input.mouseX / Engine.SCALE;
-		 	my = Input.mouseY / Engine.SCALE;
+			mx = (Input.mouseX - Engine.engine.hudLayer.x) / Engine.SCALE;
+		 	my = (Input.mouseY - Engine.engine.hudLayer.y) / Engine.SCALE;
 		}
 		
 		else
@@ -3225,8 +3235,8 @@ class Actor extends Sprite
 		{
 			// Imagine a circle with the actor's origin point as the center and the mouse position somewhere on the circle.
 			// If the circle is rotated by the actor's direction, then the mouse's new position can be compared with the actor's original bounding box.
-			var actorOriginX:Float = xPos + currOrigin.x;
-			var actorOriginY:Float = yPos + currOrigin.y;
+			var actorOriginX:Float = xPos + currOrigin.x * scaleX;
+			var actorOriginY:Float = yPos + currOrigin.y * scaleY;
 			var xFromOrigin:Float = mx - actorOriginX;
 			var yFromOrigin:Float = my - actorOriginY;
 			var rotationRadians:Float = Utils.RAD * rotation;
@@ -3236,10 +3246,20 @@ class Actor extends Sprite
 			my = myNew;
 		}
 
-		return (mx >= xPos && 
-		   		my >= yPos && 
-		   		mx < xPos + cacheWidth + offsetX * 2 && 
-		   		my < yPos + cacheHeight + offsetY * 2);
+                if(isHUD && !Engine.engine.isHUDZoomable)
+		{
+			return (mx >= xPos/Engine.engine.zoomMultiplier && 
+		   		my >= yPos/Engine.engine.zoomMultiplier && 
+		   		mx < (xPos + cacheWidth + offsetX * 2)/Engine.engine.zoomMultiplier && 
+		   		my < (yPos + cacheHeight + offsetY * 2)/Engine.engine.zoomMultiplier);	
+		}
+		else
+		{
+			return (mx >= xPos && 
+			   		my >= yPos && 
+			   		mx < xPos + cacheWidth + offsetX * 2 && 
+			   		my < yPos + cacheHeight + offsetY * 2);
+		}
 	}
 	
 	public function isMouseHover():Bool
