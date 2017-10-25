@@ -285,9 +285,31 @@ class ToolsetInterface
 					});
 				}
 
+			case "Set Game Var":
+				var attributeName = header.get("Name");
+				var attributeType = header.get("Type");
+				var attributeValue = header.get("Value");
+
+				var value = readAttribute(attributeType, attributeValue);
+				if(value != null)
+					Engine.engine.gameAttributes.set(attributeName, value);
+
 			default:
 		}
 	}
+
+	private static function readAttribute(type:String, value:String):Dynamic
+    {
+        return switch(type)
+        {
+            //case "list": readList(cast r.getDefaultValue());
+            //case "map": readMap(cast r.getDefaultValue());
+            case "Bool": return value == "true";
+            case "Float": return Std.parseFloat(value);
+            case "String": return value;
+            default: return null;
+        };
+    }
 
 	private static var traceQueue:Array<{v:Dynamic, pos:haxe.PosInfos}> = null;
 
