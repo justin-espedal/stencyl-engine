@@ -40,19 +40,17 @@ class ShapeReader
 		return points;
 	}
 
-	public static function createCircle(radius:Float, x:Float, y:Float, imgWidth:Float=-1, imgHeight:Float=-1):B2CircleShape
+	public static function createCircle(radius:Float, x:Float, y:Float):B2CircleShape
 	{
-		var diameter = radius * 2;
-		
 		var c = new B2CircleShape();
 		c.m_radius = Engine.toPhysicalUnits(radius);
-		c.m_p.x = Engine.toPhysicalUnits(x - (imgWidth - diameter)/2);
-		c.m_p.y = Engine.toPhysicalUnits(y - (imgHeight - diameter)/2);
+		c.m_p.x = Engine.toPhysicalUnits(x - radius);
+		c.m_p.y = Engine.toPhysicalUnits(y - radius);
 		
 		return c;
 	}
 
-	public static function createPolygon(type:String, points:Array<Point>, imgWidth:Int=0, imgHeight:Int=0):Dynamic
+	public static function createPolygon(type:String, points:Array<Point>):Dynamic
 	{
 		var x:Float = 0;
 		var y:Float = 0;
@@ -64,9 +62,6 @@ class ShapeReader
 		var numVertices = points.length;
 		var vIndex = 0;
 		var i = 1;
-
-		var offsetX = Std.int(-imgWidth / 2);
-		var offsetY = Std.int(-imgHeight / 2);
 		
 		if(type == "MbsPolygon" || type == "MbsPolyRegion")
 		{
@@ -77,8 +72,8 @@ class ShapeReader
 			{
 				var point = points[vIndex];
 
-				var vX:Float = Engine.toPhysicalUnits(point.x + offsetX);
-				var vY:Float = Engine.toPhysicalUnits(point.y + offsetY);
+				var vX:Float = Engine.toPhysicalUnits(point.x);
+				var vY:Float = Engine.toPhysicalUnits(point.y);
 				vertices[vIndex] = new B2Vec2(vX, vY);
 				
 				vIndex++;

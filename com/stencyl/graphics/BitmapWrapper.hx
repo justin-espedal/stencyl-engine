@@ -16,8 +16,7 @@ class BitmapWrapper extends Sprite implements EngineScaleUpdateListener
 	private var offsetY:Float;
 
 	private var autoscale:Bool = false;
-	public var cacheParentAnchor:Point = Utils.zero;
-
+	
 	@:isVar public var smoothing (get, set):Bool;
 	@:isVar public var imgX (get, set):Float;
 	@:isVar public var imgY (get, set):Float;
@@ -52,7 +51,7 @@ class BitmapWrapper extends Sprite implements EngineScaleUpdateListener
 
 	public function set_imgX(x:Float):Float
 	{
-		this.x = (x + offsetX) * Engine.SCALE - cacheParentAnchor.x;
+		this.x = (x + offsetX) * Engine.SCALE;
 
 		return imgX = x;
 	}
@@ -64,7 +63,7 @@ class BitmapWrapper extends Sprite implements EngineScaleUpdateListener
 
 	public function set_imgY(y:Float):Float
 	{
-		this.y = (y + offsetY) * Engine.SCALE - cacheParentAnchor.y;
+		this.y = (y + offsetY) * Engine.SCALE;
 
 		return imgY = y;
 	}
@@ -106,8 +105,8 @@ class BitmapWrapper extends Sprite implements EngineScaleUpdateListener
 
 	public function updatePosition():Void
 	{
-		x = (imgX + offsetX) * Engine.SCALE - cacheParentAnchor.x;
-		y = (imgY + offsetY) * Engine.SCALE - cacheParentAnchor.y;
+		x = (imgX + offsetX) * Engine.SCALE;
+		y = (imgY + offsetY) * Engine.SCALE;
 	}
 
 	public function updateScale():Void

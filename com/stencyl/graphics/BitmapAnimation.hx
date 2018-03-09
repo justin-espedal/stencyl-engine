@@ -24,8 +24,8 @@ class BitmapAnimation extends Bitmap implements AbstractAnimation
 	private var across:Int;
 	private var down:Int;
 	
-	private var frameWidth:Int;
-	private var frameHeight:Int;
+	public var frameWidth:Int;
+	public var frameHeight:Int;
 	private var region:Rectangle;
 	private var pt:Point;
 	
@@ -42,15 +42,6 @@ class BitmapAnimation extends Bitmap implements AbstractAnimation
 		this.down = down;
 		this.frameWidth = Std.int(sheet.width / across);
 		this.frameHeight = Std.int(sheet.height / down);
-		
-		//html5 rounds strangely when pixel snapping
-		#if js
-		this.x = Math.round(-sheet.width/(2 * across) * Engine.SCALE);
-		this.y = Math.round(-sheet.height/(2 * down) * Engine.SCALE);			
-		#else
-		this.x = -sheet.width/(2 * across) * Engine.SCALE;
-		this.y = -sheet.height/(2 * down) * Engine.SCALE;
-		#end
 		
 		this.timer = 0;
 		this.frameIndex = 0;
@@ -235,15 +226,6 @@ class BitmapAnimation extends Bitmap implements AbstractAnimation
 			frameWidth = Std.int(sheet.width / across);
 			frameHeight = Std.int(sheet.height / down);
 			
-			//html5 rounds strangely when pixel snapping
-			#if js
-			x = Math.round(-sheet.width/(2 * across) * Engine.SCALE);
-			y = Math.round(-sheet.height/(2 * down) * Engine.SCALE);			
-			#else
-			x = -sheet.width/(2 * across) * Engine.SCALE;
-			y = -sheet.height/(2 * down) * Engine.SCALE;
-			#end
-
 			region.width = frameWidth * Engine.SCALE;
 			region.height = frameHeight* Engine.SCALE;
 		}

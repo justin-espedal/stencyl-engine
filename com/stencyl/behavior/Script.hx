@@ -2425,6 +2425,7 @@ class Script
 	
 	public static function setOrderForImage(img:BitmapWrapper, order:Int)
 	{
+		#if (!use_actor_tilemap)
 		if(img != null && img.parent != null)
 		{
 			if(order >= 0 && order < img.parent.numChildren)
@@ -2432,52 +2433,64 @@ class Script
 				img.parent.setChildIndex(img, order);
 			}
 		}
+		#end
 	}
 
 	public static function getOrderForImage(img:BitmapWrapper)
 	{
+		#if (!use_actor_tilemap)
 		if(img != null && img.parent != null)
 		{
 			return img.parent.getChildIndex(img);
 		}
+		#end
 		
 		return -1;
 	}
 	
 	public static function bringImageBack(img:BitmapWrapper)
 	{
+		#if (!use_actor_tilemap)
 		if(img != null && img.parent != null)
 		{
 			setOrderForImage(img, img.parent.getChildIndex(img) - 1);
 		}
+		#end
 	}
 	
 	public static function bringImageForward(img:BitmapWrapper)
 	{
+		#if (!use_actor_tilemap)
 		if(img != null && img.parent != null)
 		{
 			setOrderForImage(img, img.parent.getChildIndex(img) + 1);
 		}
+		#end
 	}
 	
 	public static function bringImageToBack(img:BitmapWrapper)
 	{
+		#if (!use_actor_tilemap)
 		if(img != null && img.parent != null)
 		{
 			setOrderForImage(img, 0);
 		}
+		#end
 	}
 	
 	public static function bringImagetoFront(img:BitmapWrapper)
 	{
+		#if (!use_actor_tilemap)
 		if(img != null && img.parent != null)
 		{
 			setOrderForImage(img, img.parent.numChildren - 1);
 		}
+		#end
 	}
 	
 	public static function attachImageToActor(img:BitmapWrapper, a:Actor, x:Int, y:Int, pos:Int = 1)
 	{
+		#if (!use_actor_tilemap)
 		if(img != null)
 		{
 			//Behind the Actor - Send to the very back.
@@ -2492,13 +2505,13 @@ class Script
 				a.addChild(img);
 			}
 			
-			img.cacheParentAnchor = a.cacheAnchor;
 			img.imgX = x;
 			img.imgY = y;
 			img.smoothing = Config.antialias;
 
 			a.attachedImages.push(img);
 		}
+		#end
 	}
 	
 	//Will be "fixed" like an HUD
@@ -2537,7 +2550,7 @@ class Script
 	
 	public static function removeImage(img:BitmapWrapper)
 	{
-		if(img != null)
+		if(img != null #if (use_actor_tilemap) && img.parent != null #end)
 		{
 			if(Std.is(img.parent, Actor))
 				cast(img.parent, Actor).attachedImages.remove(img);
@@ -4368,4 +4381,44 @@ class Script
 		
 		return cm.getFilter();
 	}
+	
+	/*
+	private var toPack:Map<String, Animation>;
+	
+	public static function selectTextures()
+	{
+		toPack = new Map<String, Animation>();
+	}
+	
+	public static function addTexture(actor:Actor, anim:String)
+	{
+		var key = actor.typeID + ":" + anim;
+		toPack.set(key, actor.sprite.animations)
+	}
+	
+	public static function packTextures()
+	{
+		hxpk.Settings.environment = new hxpk.environment.StencylPackEnvironment();
+		var packer = new hxpk.TexturePacker(null, new hxpk.Settings());
+		
+		engine.allActors.reuseIterator = false;
+		for(actor in engine.allActors)
+		{
+			trace(actor);
+			for(anim in actor.sprite.animations)
+			{
+				var simpleKey = anim.parentID + "-" + anim.animID + ".png";
+				var pathKey = "assets/graphics/" + Engine.IMG_BASE + "/sprite-" + simpleKey;
+				var imgData = Data.get().getGraphicAsset(simpleKey, pathKey);
+				
+				packer.addImageBitmapData(imgData, pathKey);
+			}
+		}
+		engine.allActors.reuseIterator = true;
+		
+		packer.pack("packed-tex", "pack.atlas");
+		
+		//var packFile = openfl.Assets.getText("hxpk:graphics-packed/pack.atlas");
+		//var atlas = oepnfl.Assets.getBitmapData("hxpk:graphics-packed/pack.png");
+	}*/
 }

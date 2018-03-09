@@ -239,8 +239,8 @@ class G
 	
 		if (a.smoothMove)
 		{
-			var drawX:Float = a.drawX - Math.floor(a.cacheWidth / 2) - a.currOffset.x;
-			var drawY:Float = a.drawY - Math.floor(a.cacheHeight / 2) - a.currOffset.y;
+			var drawX:Float = a.drawX;
+			var drawY:Float = a.drawY;
 		
 			if(Engine.NO_PHYSICS)
 			{

@@ -98,7 +98,7 @@ typedef ActorAnimation = SheetAnimation;
 typedef ActorAnimation = BitmapAnimation;
 #end
 
-class Actor extends Sprite
+class Actor extends #if (use_actor_tilemap) Tile #else Sprite #end
 {	
 	//*-----------------------------------------------
 	//* Globals
@@ -118,6 +118,10 @@ class Actor extends Sprite
 	
 	//Used for recycled actors to tell them apart
 	public var createTime:Float;
+	
+	#if(use_actor_tilemap)
+	public var name:String;
+	#end
 	
 	public var ID:Int;
 	public var groupID:Int;
@@ -165,9 +169,6 @@ class Actor extends Sprite
 	//* Position / Motion
 	//*-----------------------------------------------
 	
-	public var originX:Float;
-	public var originY:Float;
-	
 	public var realX:Float;
 	public var realY:Float;
 	public var realAngle:Float;
@@ -212,11 +213,8 @@ class Actor extends Sprite
 	public var defaultAnim:String;
 	
 	public var currOrigin:Point;
-	public var currOffset:Point;
-	public var cacheAnchor:Point;
 	
 	public var transformObj:Transform;
-	public var transformPoint:Point;
 	public var transformMatrix:Matrix;
 	public var updateMatrix:Bool;
 	public var drawMatrix:Matrix; //For use when drawing actor image
@@ -237,10 +235,6 @@ class Actor extends Sprite
 	public var minMove:Float = 3;
 	public var maxMove:Float = 99999;
 
-	#if(!flash)
-	private var shader:DisplayObjectShader = null;
-	#end
-	
 	//*-----------------------------------------------
 	//* Behaviors
 	//*-----------------------------------------------
@@ -370,8 +364,6 @@ class Actor extends Sprite
 		realScaleX = 1;
 		realScaleY = 1;
 		
-		originX = 0;
-		originY = 0;
 		collidable = true;
 		solid = !isSensor;
 		updateMatrix = true;
@@ -391,13 +383,11 @@ class Actor extends Sprite
 		
 		tweenLoc = new Point(0, 0);
 		tweenAngle = new AngleHolder();
-				
-		transformPoint = new Point(0, 0);
+		
 		transformMatrix = new Matrix();
 		drawMatrix = new Matrix();
 		
 		currOrigin = new Point(0, 0);
-		currOffset = new Point(0, 0);			
 		registry = new Map<String,Dynamic>();
 		
 		attachedImages = new Array<BitmapWrapper>();
@@ -591,8 +581,6 @@ class Actor extends Sprite
 			}
 		}
 
-		cacheAnchor = new Point(0, 0);
-
 		switchToDefaultAnimation();
 		
 		//Use set location to align actors
@@ -605,6 +593,7 @@ class Actor extends Sprite
 		{
 			if(shape != null && Std.is(shape, com.stencyl.models.collision.Mask))
 			{
+				#if(!use_actor_tilemap)
 				//TODO: Very inefficient for CPP/mobile - can we force width/height a different way?
 				var dummy = new Bitmap(new BitmapData(1, 1, true, 0));
 				dummy.x = width;
@@ -612,6 +601,7 @@ class Actor extends Sprite
 				addChild(dummy);
 				cacheWidth = this.width = width;
 				cacheHeight = this.height = height;
+				#end
 			}
 			
 			else if(physicsMode == NORMAL_PHYSICS)
@@ -638,12 +628,14 @@ class Actor extends Sprite
 		
 		destroyed = true;
 		
+		#if(!use_actor_tilemap)
 		for(anim in animationMap)
 		{
 			anim.visible = false;
 		}
 		
 		Utils.removeAllChildren(this);
+		#end
 
 		if(body != null && physicsMode == NORMAL_PHYSICS)
 		{
@@ -667,7 +659,6 @@ class Actor extends Sprite
 		defaultAnim = null;
 		animationMap = null;
 		currAnimation = null;
-		currOffset = null;
 		currOrigin = null;
 		body = null;
 		sprite = null;
@@ -676,7 +667,6 @@ class Actor extends Sprite
 		contactCount = 0;
 		collisionsCount = 0;
 		
-		transformPoint = null;
 		transformMatrix = null;
 		
 		whenCreatedListeners = null;
@@ -820,9 +810,8 @@ class Actor extends Sprite
 			//XXX: This ends up being the case for the recyclingDefault animation.
 			#if (use_actor_tilemap)
 
-			var tileset = new Tileset(new BitmapData(16, 16));
-			tileset.addRect(new openfl.geom.Rectangle(0, 0, 16, 16));
-			var tempSprite = new SheetAnimation(tileset, [1000000], 16, 16, false, null);
+			var img = new BitmapData(16, 16);
+			var tempSprite = new SheetAnimation(img, [1000000], 16, 16, false, null);
 			tempSprite.framesAcross = 1;
 			animationMap.set(name, tempSprite);
 			
@@ -838,20 +827,12 @@ class Actor extends Sprite
 		}
 	
 		#if (use_actor_tilemap)
-		var tileset = new Tileset(imgData);
-		
 		frameWidth = Std.int(imgData.width/framesAcross);
 		frameHeight = Std.int(imgData.height/framesDown);
 		
-		for(i in 0...frameCount)
-		{			
-			tileset.addRect(new openfl.geom.Rectangle(frameWidth * (i % framesAcross), Math.floor(i / framesAcross) * frameHeight, frameWidth, frameHeight));
-			// trace("x: " + (frameWidth * (i % framesAcross)) + " y: " + (Math.floor(i / framesAcross) * frameHeight) + " w: " + (frameWidth) + " h: " + (frameHeight));
-		}
-		
 		var sprite = new SheetAnimation
 		(
-			tileset, 
+			imgData, 
 			durations, 
 			frameWidth, 
 			frameHeight,
@@ -888,17 +869,12 @@ class Actor extends Sprite
 				var actorAnim = animationMap.get(a.animName);
 				actorAnim.setBitmap(a.imgData);
 			}
-			updateChildrenPositions();
 		}
 		else
 		{
 			var a = sprite.animations.get(animID);
 			var actorAnim = animationMap.get(a.animName);
 			actorAnim.setBitmap(a.imgData);
-			if(actorAnim == currAnimation)
-			{
-				updateChildrenPositions();
-			}
 		}
 	}
 
@@ -1204,10 +1180,12 @@ class Actor extends Sprite
 				return;
 			}
 			
+			#if (!use_actor_tilemap)
 			if(currAnimation != null)
 			{
 				removeChild(currAnimation);
 			}
+			#end
 			
 			//---
 			
@@ -1315,11 +1293,11 @@ class Actor extends Sprite
 			
 			currAnimationName = name;
 			currAnimation = newAnimation;
-			#if(!flash)
-			currAnimation.shader = shader;
+			//currAnimation.shader = shader;
+			
+			#if (!use_actor_tilemap)
+			addChild(newAnimation);	
 			#end
-
-			addChild(newAnimation);			
 			
 			//----------------
 			
@@ -1329,9 +1307,9 @@ class Actor extends Sprite
 			{
 				updateTweenProperties();
 			}
-						
-			var centerx = (currAnimation.width / Engine.SCALE / 2) - animOrigin.x;
-			var centery = (currAnimation.height / Engine.SCALE / 2) - animOrigin.y;
+			
+			var centerx = (currAnimation.frameWidth / 2) - animOrigin.x;
+			var centery = (currAnimation.frameHeight / 2) - animOrigin.y;
 			
 			if(body != null && isDifferentShape && physicsMode == NORMAL_PHYSICS)
 			{
@@ -1401,7 +1379,7 @@ class Actor extends Sprite
 					originFixDef.shape = f.shape;
 
 					//TODO: Origin point junk goes here
-					if (animOrigin != null)
+					/*if (animOrigin != null)
 					{
 						body.origin.x = Engine.toPhysicalUnits(-animOrigin.x);
 						body.origin.y = Engine.toPhysicalUnits(-animOrigin.y);
@@ -1443,7 +1421,7 @@ class Actor extends Sprite
 							
 							originFixDef.shape = newCircle;
 						}
-					}
+					}*/
 					
 					var fix = body.createFixture(originFixDef);
 					fix.SetUserData(this);	
@@ -1482,8 +1460,8 @@ class Actor extends Sprite
 				isDifferentShape = true;
 			}
 			
-			cacheWidth = currAnimation.width / Engine.SCALE;
-			cacheHeight = currAnimation.height / Engine.SCALE;			
+			cacheWidth = currAnimation.frameWidth;
+			cacheHeight = currAnimation.frameHeight;
 			
 			if(body != null)
 			{
@@ -1501,42 +1479,33 @@ class Actor extends Sprite
 			{					
 				setOriginPoint(Std.int(animOrigin.x), Std.int(animOrigin.y));				
 			}
-
-			updateChildrenPositions();
 			
 			updateMatrix = true;
 			
 			//----------------
 			
+			#if (use_actor_tilemap)
+			currAnimation.initialize();
+			#end
+			
 			currAnimation.reset();
-		}
-	}
-
-	public function updateChildrenPositions()
-	{
-		var newAnchor = new Point(-currAnimation.x, -currAnimation.y);
-		if(!newAnchor.equals(cacheAnchor))
-		{
-			cacheAnchor.copyFrom(newAnchor);
-			for(img in attachedImages)
-			{
-				img.updatePosition();
-			}
-			if(label != null)
-			{
-				label.updatePosition();
-			}
+			
+			#if (use_actor_tilemap)
+			id = currAnimation.getCurrentFrame() + currAnimation.model.frameIndexOffset;
+			tileset = currAnimation.model.tileset.tileset;
+			#end
 		}
 	}
 
 	public function removeAttachedImages()
 	{
+		#if (!use_actor_tilemap)
 		for(b in attachedImages)
 		{
-			b.cacheParentAnchor = Utils.zero;
 			removeChild(b);
 		}
 		attachedImages = new Array<BitmapWrapper>();
+		#end
 	}
 	
 	//*-----------------------------------------------
@@ -1722,8 +1691,11 @@ class Actor extends Sprite
 		
 		if(doAll && currAnimation != null)
 		{
-   			//This may be a slowdown on iOS by 3-5 FPS due to clear and redraw?
-   			currAnimation.update(elapsedTime);
+			currAnimation.update(elapsedTime);
+			
+			#if (use_actor_tilemap)
+			id = currAnimation.getCurrentFrame() + currAnimation.model.frameIndexOffset;
+			#end
 		}
 			
 		updateTweenProperties();		
@@ -1863,35 +1835,31 @@ class Actor extends Sprite
 			}
 		}
 		
-		transformPoint.x = currOrigin.x - (cacheWidth*Engine.SCALE) / 2;
-		transformPoint.y = currOrigin.y - (cacheHeight*Engine.SCALE) / 2;
-
 		transformMatrix.identity();
-		transformMatrix.translate( -transformPoint.x * Engine.SCALE, -transformPoint.y * Engine.SCALE);
+		transformMatrix.translate( -currOrigin.x * Engine.SCALE, -currOrigin.y * Engine.SCALE);
 		transformMatrix.scale(realScaleX, realScaleY);
-		
-		if(realAngle != 0)
-		{
-			transformMatrix.rotate(realAngle * Utils.RAD);
-		}
+		if(realAngle != 0) transformMatrix.rotate(realAngle * Utils.RAD);
+		transformMatrix.translate( currOrigin.x * Engine.SCALE, currOrigin.y * Engine.SCALE);
 		
 		if (Config.pixelsnap)
 		{
 			transformMatrix.translate(Math.round(drawX) * Engine.SCALE, Math.round(drawY) * Engine.SCALE);
 		}
-		
 		else
 		{
 			transformMatrix.translate(drawX * Engine.SCALE, drawY * Engine.SCALE);
 		}
 		
-						
+		#if(!use_actor_tilemap)
 		if(transformObj == null)
 		{
 			transformObj = transform;
 		}
 		
 		transformObj.matrix = transformMatrix;
+		#else
+		matrix = transformMatrix;
+		#end
 	}
 	
 	public function updateTweenProperties()
@@ -1917,8 +1885,8 @@ class Actor extends Sprite
 				realY = tweenLoc.y;
 				realAngle = tweenAngle.angle;
 				
-				dummy.x = Engine.toPhysicalUnits(realX + Math.floor(cacheWidth/2) + currOffset.x);
-				dummy.y = Engine.toPhysicalUnits(realY + Math.floor(cacheHeight/2) + currOffset.y);
+				dummy.x = Engine.toPhysicalUnits(realX);
+				dummy.y = Engine.toPhysicalUnits(realY);
 			
 				body.setPositionAndAngle
 				(
@@ -2509,41 +2477,74 @@ class Actor extends Sprite
 	
 	public function moveToBottom()
 	{
+		#if(use_actor_tilemap)
+		this.parent.setTileIndex(this, 0);
+		#else
 		this.parent.setChildIndex(this, 0);
+		#end
 	}
 	
 	public function moveToTop()
 	{
+		#if(use_actor_tilemap)
+		this.parent.setTileIndex(this, this.parent.numTiles-1);
+		#else
 		this.parent.setChildIndex(this, this.parent.numChildren-1);
+		#end
 	}
 	
 	public function moveDown()
 	{
+		#if(!use_actor_tilemap)
 		var index:Int = this.parent.getChildIndex(this);
 		if (index > 0)
 		{
 			this.parent.setChildIndex(this, index-1);
 		}
+		#else
+		var index:Int = this.parent.getTileIndex(this);
+		if(index > 0)
+		{
+			this.parent.setTileIndex(this, index-1);
+		}
+		#end
 	}
 	
 	public function moveUp()
 	{
+		#if(!use_actor_tilemap)
 		var index:Int = this.parent.getChildIndex(this);
 		var max:Int = this.parent.numChildren-1;
 		if (index < max)
 		{
 			this.parent.setChildIndex(this, index+1);
 		}
+		#else
+		var index:Int = this.parent.getTileIndex(this);
+		var max:Int = this.parent.numTiles-1;
+		if(index < max)
+		{
+			this.parent.setTileIndex(this, index-1);
+		}
+		#end
 	}
 	
 	public function getZIndex():Int
 	{
+		#if(!use_actor_tilemap)
 		return this.parent.getChildIndex(this);
+		#else
+		return this.parent.getTileIndex(this);
+		#end
 	}
 	
 	public function setZIndex(zindex:Int)
 	{
+		#if(!use_actor_tilemap)
 		var max:Int = this.parent.numChildren-1;
+		#else
+		var max:Int = this.parent.numTiles-1;
+		#end
 		if (zindex > max)
 		{
 			zindex = max;
@@ -2552,7 +2553,11 @@ class Actor extends Sprite
 		{
 			zindex = 0;
 		}
+		#if(!use_actor_tilemap)
 		this.parent.setChildIndex(this, zindex);
+		#else
+		this.parent.setTileIndex(this, zindex);
+		#end
 	}
 	
 	//*-----------------------------------------------
@@ -2564,28 +2569,17 @@ class Actor extends Sprite
 		smoothMove = true;
 	}
 	
-	//Big Change: Returns relative to the origin point as (0,0). Meaning if the origin = center, the center is now (0,0)!
-	
 	public function getX(round:Bool = true):Float
 	{
 		var toReturn:Float = -1;
 		
-		if(!Engine.NO_PHYSICS)
-		{
-			if(isRegion || isTerrainRegion)
-			{
-				toReturn = Engine.toPixelUnits(body.getPosition().x) - cacheWidth/2;
-			}
-			
-			else if(physicsMode == NORMAL_PHYSICS)
-			{
-				toReturn = body.getPosition().x * Engine.physicsScale - Math.floor(cacheWidth / 2) - currOffset.x;
-			}
-		}
-		
 		if (Engine.NO_PHYSICS || physicsMode != NORMAL_PHYSICS)
 		{
-			toReturn = realX - Math.floor(cacheWidth/2) - currOffset.x;
+			toReturn = realX;
+		}
+		else
+		{
+			toReturn = Engine.toPixelUnits(body.getPosition().x);
 		}
 		
 		return round ? Math.round(toReturn) : toReturn;
@@ -2595,51 +2589,50 @@ class Actor extends Sprite
 	{
 		var toReturn:Float = -1;
 		
-		if(!Engine.NO_PHYSICS)
-		{
-			if(isRegion || isTerrainRegion)
-			{				
-				toReturn = Engine.toPixelUnits(body.getPosition().y) - cacheHeight/2;
-			}
-			
-			else if(physicsMode == NORMAL_PHYSICS)
-			{
-				toReturn = body.getPosition().y * Engine.physicsScale - Math.floor(cacheHeight / 2) - currOffset.y;
-			}
-		}
-		
 		if (Engine.NO_PHYSICS || physicsMode != NORMAL_PHYSICS)
 		{
-			toReturn = realY - Math.floor(cacheHeight / 2) - currOffset.y;
+			toReturn = realY;
+		}
+		else
+		{
+			toReturn = Engine.toPixelUnits(body.getPosition().y);
 		}
 		
 		return round ? Math.round(toReturn) : toReturn;
 	}
 	
-	public function getXCenter():Float
+	public function getXCenter(round:Bool = true):Float
 	{
+		var toReturn:Float = -1;
+		
 		if(physicsMode == NORMAL_PHYSICS)
 		{
-			return Math.round(Engine.toPixelUnits(body.getWorldCenter().x) - currOffset.x);
+			toReturn = Engine.toPixelUnits(body.getWorldCenter().x);
 		}
 		
 		else
 		{
-			return realX - currOffset.x;
+			toReturn = realX + cacheWidth / 2;
 		}
+		
+		return round ? Math.round(toReturn) : toReturn;
 	}
 	
-	public function getYCenter():Float
+	public function getYCenter(round:Bool = true):Float
 	{
+		var toReturn:Float = -1;
+		
 		if(physicsMode == NORMAL_PHYSICS)
 		{
-			return Math.round(Engine.toPixelUnits(body.getWorldCenter().y) - currOffset.y);
+			toReturn = Engine.toPixelUnits(body.getWorldCenter().y);
 		}
 		
 		else
 		{
-			return realY - currOffset.y;
+			toReturn = realY;
 		}
+		
+		return round ? Math.round(toReturn) : toReturn;
 	}
 	
 	public function getScreenX():Float
@@ -2672,26 +2665,17 @@ class Actor extends Sprite
 	{	
 		if(physicsMode == SIMPLE_PHYSICS)
 		{
-			moveActorTo(x + Math.floor(cacheWidth/2) + currOffset.x, realY, !noCollision && continuousCollision ? groupsToCollideWith: null);
+			moveActorTo(x, realY, !noCollision && continuousCollision ? groupsToCollideWith: null);
 		}
 		
 		else if(physicsMode == MINIMAL_PHYSICS)
 		{
-			resetReal(x + Math.floor(cacheWidth/2) + currOffset.x, realY);
+			resetReal(x, realY);
 		}
 		
 		else
 		{
-			if(isRegion || isTerrainRegion)
-			{
-				dummy.x = Engine.toPhysicalUnits(x);
-			}
-				
-			else
-			{
-				dummy.x = Engine.toPhysicalUnits(x + Math.floor(cacheWidth/2) + currOffset.x);
-			}			
-			
+			dummy.x = Engine.toPhysicalUnits(x);
 			dummy.y = body.getPosition().y;
 			
 			body.setPosition(dummy);
@@ -2715,27 +2699,18 @@ class Actor extends Sprite
 	{		
 		if(physicsMode == SIMPLE_PHYSICS)
 		{
-			moveActorTo(realX, y + Math.floor(cacheHeight/2) + currOffset.y, !noCollision && continuousCollision ? groupsToCollideWith : null);
+			moveActorTo(realX, y, !noCollision && continuousCollision ? groupsToCollideWith : null);
 		}
 		
 		else if(physicsMode == MINIMAL_PHYSICS)
 		{
-			resetReal(realX, y + Math.floor(cacheHeight/2) + currOffset.y);
+			resetReal(realX, y);
 		}
 		
 		else
-		{	
-			if(isRegion || isTerrainRegion)
-			{
-				dummy.y = Engine.toPhysicalUnits(y);
-			}
-				
-			else
-			{
-				dummy.y = Engine.toPhysicalUnits(y + Math.floor(cacheHeight/2) + currOffset.y);
-			}
-			
+		{
 			dummy.x = body.getPosition().x;
+			dummy.y = Engine.toPhysicalUnits(y);
 			
 			body.setPosition(dummy);		
 			
@@ -2753,34 +2728,23 @@ class Actor extends Sprite
 		
 		updateMatrix = true;
 	}
+	
 	public function setXY(x:Float, y:Float, resetSpeed:Bool = false, noCollision:Bool = false)
 	{
 		if(physicsMode == SIMPLE_PHYSICS)
 		{
-			moveActorTo(
-				x + Math.floor(cacheWidth/2) + currOffset.x,
-				y + Math.floor(cacheHeight/2) + currOffset.y,
-				!noCollision && continuousCollision ? groupsToCollideWith : null);
+			moveActorTo(x, y, !noCollision && continuousCollision ? groupsToCollideWith : null);
 		}
 		
 		else if(physicsMode == MINIMAL_PHYSICS)
 		{
-			resetReal(x + Math.floor(cacheWidth/2) + currOffset.x, y + Math.floor(cacheHeight/2) + currOffset.y);
+			resetReal(x, y);
 		}
 		
 		else
 		{	
-			if(isRegion || isTerrainRegion)
-			{
-				dummy.x = Engine.toPhysicalUnits(x);
-				dummy.y = Engine.toPhysicalUnits(y);
-			}
-				
-			else
-			{
-				dummy.x = Engine.toPhysicalUnits(x + Math.floor(cacheWidth/2) + currOffset.x);
-				dummy.y = Engine.toPhysicalUnits(y + Math.floor(cacheHeight/2) + currOffset.y);
-			}
+			dummy.x = Engine.toPhysicalUnits(x);
+			dummy.y = Engine.toPhysicalUnits(y);
 			
 			body.setPosition(dummy);		
 			
@@ -2801,12 +2765,12 @@ class Actor extends Sprite
 	
 	public function setXCenter(x:Float)
 	{
-		setX(x - (getWidth() / 2));
+		setX(x - cacheWidth / 2);
 	}
 	
 	public function setYCenter(y:Float)
 	{
-		setY(y - (getHeight() / 2));
+		setY(y - cacheHeight / 2);
 	}
 	
 	public function setScreenX(x:Float)
@@ -2867,7 +2831,7 @@ class Actor extends Sprite
 	
 	public function setOriginPoint(x:Int, y:Int)
 	{
-		var resetPosition:B2Vec2 = null;
+		/*var resetPosition:B2Vec2 = null;
 		
 		if (physicsMode == NORMAL_PHYSICS)
 		{
@@ -2879,7 +2843,6 @@ class Actor extends Sprite
 			resetPosition = new B2Vec2(Engine.toPhysicalUnits(realX), Engine.toPhysicalUnits(realY));
 		}
 		
-		var offsetDiff:B2Vec2 = new B2Vec2(currOffset.x, currOffset.y);
 		var radians:Float = getAngle();
 			
 		var rotated:Bool = Std.int(radians * Utils.DEG) != 0;	
@@ -2887,35 +2850,29 @@ class Actor extends Sprite
 		var w:Float = cacheWidth;
 		var h:Float = cacheHeight;
 		
-		var newOffX:Int = Std.int(x - (w / 2));
-		var newOffY:Int = Std.int(y - (h / 2));
+		var newOffX:Int = Std.int(x);
+		var newOffY:Int = Std.int(y);
 				
-		if (currOrigin != null && (Std.int(currOffset.x) != newOffX || Std.int(currOffset.y) != newOffY) && rotated)
+		if (currOrigin != null && rotated)
 		{
 			var oldAng:Float = radians + Math.atan2( -currOffset.y, -currOffset.x);
 			var newAng:Float = radians + Math.atan2( -newOffY, -newOffX);			
 			var oldDist:Float = Math.sqrt(Math.pow(currOffset.x, 2) + Math.pow(currOffset.y, 2));
 			var newDist:Float = Math.sqrt(Math.pow(newOffX, 2) + Math.pow(newOffY, 2));
-							
+			
 			var oldFixCenterX:Int = Math.round(currOrigin.x + Math.cos(oldAng) * oldDist);
 			var oldFixCenterY:Int = Math.round(currOrigin.y + Math.sin(oldAng) * oldDist);
 			var newFixCenterX:Int = Math.round(x + Math.cos(newAng) * newDist);
 			var newFixCenterY:Int = Math.round(y + Math.sin(newAng) * newDist);
-					
+			
 			resetPosition.x += Engine.toPhysicalUnits(oldFixCenterX - newFixCenterX);
 			resetPosition.y += Engine.toPhysicalUnits(oldFixCenterY - newFixCenterY);
 		}
 		
 		currOrigin.x = x;
 		currOrigin.y = y;
-		originX = currOffset.x = newOffX;
-		originY = currOffset.y = newOffY;
-							
-		offsetDiff.x = currOffset.x - offsetDiff.x;
-		offsetDiff.y = currOffset.y - offsetDiff.y;		
-					
-		resetPosition.x += Engine.toPhysicalUnits(offsetDiff.x);
-		resetPosition.y += Engine.toPhysicalUnits(offsetDiff.y);
+		currOffset.x = newOffX;
+		currOffset.y = newOffY;
 		
 		if(physicsMode == NORMAL_PHYSICS)
 		{
@@ -2926,7 +2883,10 @@ class Actor extends Sprite
 		{
 			realX = Engine.toPixelUnits(resetPosition.x);
 			realY = Engine.toPixelUnits(resetPosition.y);
-		}
+		}*/
+		
+		currOrigin.x = x;
+		currOrigin.y = y;
 		
 		resetOrigin = true;
 	}
@@ -3435,26 +3395,13 @@ class Actor extends Sprite
 		 	my = (Input.mouseY - Engine.cameraY * engine.layers.get(layerID).scrollFactorY) / Engine.SCALE;
 		}
 		
-		//TODO: Mike - Make this work with arbitrary origin points
-		//The problem was that mouse detect was off for higher scales
-		//and would only work within the centered, original bounds.
 		var scaleXAbs = Math.abs(scaleX);
 		var scaleYAbs = Math.abs(scaleY);
-		var offsetX = (scaleXAbs - 1) * Math.floor(cacheWidth/2);
-		var offsetY = (scaleYAbs - 1) * Math.floor(cacheHeight/2);
+		var offsetX = (scaleX - 1) * cacheWidth;
+		var offsetY = (scaleY - 1) * cacheHeight;
 		
-		// Added to fix this issue -- http://community.stencyl.com/index.php?issue=488.0
-		if(physicsMode != NORMAL_PHYSICS)
-		{
-			// Check if the origin point is something other than center.
-			if((currOrigin.x != cacheWidth / 2) || (currOrigin.y != cacheHeight / 2))
-			{
-				resetReal(realX, realY);
-			}
-		}
-		
-		var xPos = colX - offsetX;
-		var yPos = colY - offsetY;
+		var xPos = realX - offsetX;
+		var yPos = realY - offsetY;
 
 		if(rotation != 0)
 		{
@@ -3471,20 +3418,20 @@ class Actor extends Sprite
 			my = myNew;
 		}
 
-                if(isHUD && !Engine.engine.isHUDZoomable)
+		if(isHUD && !Engine.engine.isHUDZoomable)
 		{
 			return (mx >= xPos/Engine.engine.zoomMultiplier && 
-		   		my >= yPos/Engine.engine.zoomMultiplier && 
-		   		mx < (xPos + cacheWidth + offsetX * 2)/Engine.engine.zoomMultiplier && 
-		   		my < (yPos + cacheHeight + offsetY * 2)/Engine.engine.zoomMultiplier);	
+					my >= yPos/Engine.engine.zoomMultiplier && 
+					mx < (xPos + cacheWidth + offsetX * 2)/Engine.engine.zoomMultiplier && 
+					my < (yPos + cacheHeight + offsetY * 2)/Engine.engine.zoomMultiplier);	
 		}
 		else
 		{
 			return (mx >= xPos && 
-			   		my >= yPos && 
-			   		mx < xPos + cacheWidth + offsetX * 2 && 
-			   		my < yPos + cacheHeight + offsetY * 2);
-		}
+					my >= yPos && 
+					mx < xPos + cacheWidth + offsetX * 2 && 
+					my < yPos + cacheHeight + offsetY * 2);
+			}
 	}
 	
 	public function isMouseHover():Bool
@@ -3608,11 +3555,6 @@ class Actor extends Sprite
 	{
 		updateTweenProperties();
 		activePositionTweens = 0;
-		
-		if (currOffset != null)
-		{
-			resetReal(realX, realY);
-		}
 	}
 	
 	
@@ -3645,10 +3587,7 @@ class Actor extends Sprite
 			if (realAngle > 0)
 			{
 				drawMatrix.identity();
-				transformPoint.x = 0 - (cacheWidth*Engine.SCALE) / 2;
-				transformPoint.y = 0 - (cacheHeight*Engine.SCALE) / 2;
-
-				drawMatrix.translate( -transformPoint.x * Engine.SCALE, -transformPoint.y * Engine.SCALE);
+				
 				drawMatrix.scale(realScaleX, realScaleY);		
 				drawMatrix.rotate(realAngle * Utils.RAD);		
 		
@@ -3658,10 +3597,19 @@ class Actor extends Sprite
 				y += transformMatrix.ty - drawMatrix.ty;
 			}
 			
+			#if (!use_actor_tilemap)
 			var visibleCache = currAnimation.visible;
 			currAnimation.visible = true;
+			#else
+			var visibleCache = visible;
+			visible = true;
+			#end
 			currAnimation.draw(g, x, y, realAngle * Utils.RAD, g.alpha);
+			#if (!use_actor_tilemap)
 			currAnimation.visible = visibleCache;
+			#else
+			visible = visibleCache;
+			#end
 		}
 	}
 	
@@ -3674,6 +3622,7 @@ class Actor extends Sprite
 	{
 		drawActor = true;
 		
+		#if(!use_actor_tilemap)
 		if(currAnimation != null)
 		{
 			currAnimation.visible = true;
@@ -3686,12 +3635,16 @@ class Actor extends Sprite
 				anim.visible = true;
 			}
 		}
+		#else
+		visible = true;
+		#end
 	}
 	
 	public function disableActorDrawing()
 	{
 		drawActor = false;
 		
+		#if(!use_actor_tilemap)
 		if(currAnimation != null)
 		{
 			currAnimation.visible = false;
@@ -3704,6 +3657,9 @@ class Actor extends Sprite
 				anim.visible = false;
 			}
 		}
+		#else
+		visible = false;
+		#end
 	}
 	
 	public function drawsImage():Bool
@@ -3717,22 +3673,30 @@ class Actor extends Sprite
 
 	public function setFilter(filter:Array<BitmapFilter>)
 	{
+		#if (!use_actor_tilemap)
 		filters = filters.concat(filter);
+		#end
 	}
 	
 	public function clearFilters()
 	{
+		#if (!use_actor_tilemap)
 		filters = [];
+		#end
 	}
 	
 	public function setBlendMode(blendMode:BlendMode)
 	{
+		#if (!use_actor_tilemap)
 		this.blendMode = blendMode;
+		#end
 	}
 	
 	public function resetBlendMode()
 	{
+		#if (!use_actor_tilemap)
 		this.blendMode = BlendMode.NORMAL;
+		#end
 	}
 	
 	//*-----------------------------------------------
@@ -3909,6 +3873,7 @@ class Actor extends Sprite
 	
 	public function anchorToScreen()
 	{
+		#if (!use_actor_tilemap)
 		if(physicsMode == NORMAL_PHYSICS)
 		{
 			body.setAlwaysActive(true);
@@ -3916,14 +3881,16 @@ class Actor extends Sprite
 		
 		isHUD = true;	
 		engine.removeActorFromLayer(this, layerID);
-		engine.addHUDActor(this);		
+		engine.addHUDActor(this);
 		engine.hudLayer.addChild(this);
 		
 		updateMatrix = true;
+		#end
 	}
 	
 	public function unanchorFromScreen()
 	{
+		#if (!use_actor_tilemap)
 		if(physicsMode == NORMAL_PHYSICS)
 		{
 			body.setAlwaysActive(alwaysSimulate);
@@ -3932,9 +3899,10 @@ class Actor extends Sprite
 		isHUD = false;			
 		engine.removeHUDActor(this);
 		engine.hudLayer.removeChild(this);
-		engine.moveActorToLayer(this, layerID);		
+		engine.moveActorToLayer(this, layerID);
 		
 		updateMatrix = true;
+		#end
 	}
 	
 	public function isAnchoredToScreen():Bool
@@ -4048,7 +4016,7 @@ class Actor extends Sprite
 		killLeaveScreen = true;
 	}
 	
-	override public function toString():String
+	#if(!use_actor_tilemap) override #end public function toString():String
 	{
 		if(name == null)
 		{
@@ -4091,8 +4059,8 @@ class Actor extends Sprite
 		{
 			var polygon:B2PolygonShape = new B2PolygonShape();
 			var vertices:Array<B2Vec2> = new Array<B2Vec2>();
-			x = Engine.toPhysicalUnits(x - Math.floor(cacheWidth / 2) - currOffset.x);
-			y = Engine.toPhysicalUnits(y - Math.floor(cacheHeight / 2) - currOffset.y);
+			x = Engine.toPhysicalUnits(x);
+			y = Engine.toPhysicalUnits(y);
 			w = Engine.toPhysicalUnits(w);
 			h = Engine.toPhysicalUnits(h);
 			vertices.push(new B2Vec2(x, y));
@@ -4120,8 +4088,8 @@ class Actor extends Sprite
 	
 	public function addVertex(vertices:Array<B2Vec2>, x:Float, y:Float)
 	{
-		x = Engine.toPhysicalUnits(x - Math.floor(cacheWidth / 2) - currOffset.x);
-		y = Engine.toPhysicalUnits(y - Math.floor(cacheHeight / 2) - currOffset.y);
+		x = Engine.toPhysicalUnits(x);
+		y = Engine.toPhysicalUnits(y);
 		vertices.push(new B2Vec2(x, y));
 	}
 	
@@ -4480,8 +4448,8 @@ class Actor extends Sprite
 	public function resetReal(x:Float, y:Float)
 	{
 		realX = x; realY = y;
-		colX = realX - Math.floor(cacheWidth/2) - currOffset.x;
-		colY = realY - Math.floor(cacheHeight / 2) - currOffset.y;
+		colX = realX;
+		colY = realY;
 	}
 	
 	private function adjustByWidth(posDir:Bool):Float

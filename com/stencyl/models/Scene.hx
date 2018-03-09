@@ -249,18 +249,16 @@ class Scene
 	function addPolygonRegion(p:PolyDecompBayazit)
 	{
    		trace("THE POLY: " + p.points);
-   		trace(currW + ", " + currH);
-
-   		var polyShape = cast(ShapeReader.createPolygon("MbsPolyRegion", p.points, currW, currH), B2PolygonShape);
+   		
+   		var polyShape = cast(ShapeReader.createPolygon("MbsPolyRegion", p.points), B2PolygonShape);
 		shapeList.push(polyShape);
 	}
 	
 	function addPolygonTerrain(p:PolyDecompBayazit)
 	{
 		trace("THE POLY: " + p.points);
-		trace(currW + ", " + currH);
 		
-		var polyShape = cast(ShapeReader.createPolygon("MbsPolyRegion", p.points, currW, currH), B2PolygonShape);
+		var polyShape = cast(ShapeReader.createPolygon("MbsPolyRegion", p.points), B2PolygonShape);
 		shapeList.push(polyShape);
 	}
 	

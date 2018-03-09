@@ -87,8 +87,6 @@ class Region extends Actor
 			cacheWidth = originalWidth = regionWidth = Math.round(Math.abs(lowerXBound - upperXBound));
 			cacheHeight = originalHeight = regionHeight = Math.round(Math.abs(lowerYBound - upperYBound));
 			
-			currOffset.x = -(cacheWidth / 2);
-			currOffset.y = -(cacheHeight / 2);
 			resetReal(x, y);
 		}
 		

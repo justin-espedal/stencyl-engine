@@ -69,8 +69,8 @@ class SpriteReader implements AbstractReader
 		var framesDown = r.getDown();
 		
 		var parentID:Int = parent.ID;
-		var simpleShapes = readSimpleShapes(r, Std.int(imgWidth/framesAcross), Std.int(imgHeight/framesDown));
-		var physicsShapes = readShapes(r, Std.int(imgWidth/framesAcross), Std.int(imgHeight/framesDown));
+		var simpleShapes = readSimpleShapes(r);
+		var physicsShapes = readShapes(r);
 		var looping = r.getLoop();
 		var sync = r.getSync();
 		var durations = new Array<Int>();
@@ -108,7 +108,7 @@ class SpriteReader implements AbstractReader
 		);
 	}
 	
-	public function readSimpleShapes(r:MbsAnimation, imgWidth:Float, imgHeight:Float):Map<Int,Dynamic>
+	public function readSimpleShapes(r:MbsAnimation):Map<Int,Dynamic>
 	{
 		var shapes = new Map<Int,Dynamic>();
 		
@@ -163,7 +163,7 @@ class SpriteReader implements AbstractReader
 		return shapes;
 	}
 	
-	public function readShapes(r:MbsAnimation, imgWidth:Int, imgHeight:Int):Map<Int,Dynamic>
+	public function readShapes(r:MbsAnimation):Map<Int,Dynamic>
 	{
 		var shapes = new Map<Int,Dynamic>();
 		
@@ -187,12 +187,12 @@ class SpriteReader implements AbstractReader
 			if(Std.is(shapeData, MbsCircle))
 			{
 				var circle:MbsCircle = cast shapeData;
-				shape = ShapeReader.createCircle(circle.getRadius(), circle.getPosition().getX(), circle.getPosition().getY(), imgWidth, imgHeight);
+				shape = ShapeReader.createCircle(circle.getRadius(), circle.getPosition().getX(), circle.getPosition().getY());
 			}
 			else
 			{
 				var polygon:MbsPolygon = cast shapeData;
-				shape = ShapeReader.createPolygon(shapeData.getMbsType().getName(), ShapeReader.readPoints(polygon.getPoints()).toArray(), imgWidth, imgHeight);
+				shape = ShapeReader.createPolygon(shapeData.getMbsType().getName(), ShapeReader.readPoints(polygon.getPoints()).toArray());
 			}
 			
 			var fixtureDef = new B2FixtureDef();

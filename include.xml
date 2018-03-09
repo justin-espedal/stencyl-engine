@@ -10,6 +10,7 @@
 	<haxelib name="box2d" />
 	<haxelib name="cloner" />
 	<haxelib name="mbs" />
+	<haxelib name="hxpk" if="lime-opengl" />
 
 	<template path="templates" />
 

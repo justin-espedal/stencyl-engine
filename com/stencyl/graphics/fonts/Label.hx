@@ -61,8 +61,6 @@ class Label extends Sprite implements EngineScaleUpdateListener
 	public var _characterTilemap:Tilemap;
 	#end
 
-	public var cacheParentAnchor:Point = Utils.zero;
-	
 	/**
 	 * Constructs a new text field component.
 	 * @param pFont	optional parameter for component's font prop
@@ -916,8 +914,8 @@ class Label extends Sprite implements EngineScaleUpdateListener
 
 	public function updatePosition():Void
 	{
-		x = labelX * Engine.SCALE - cacheParentAnchor.x;
-		y = labelY * Engine.SCALE - cacheParentAnchor.y;
+		x = labelX * Engine.SCALE;
+		y = labelY * Engine.SCALE;
 	}
 
 	public function updateScale():Void
