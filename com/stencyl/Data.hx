@@ -23,6 +23,7 @@ import com.stencyl.models.Font;
 import com.stencyl.models.actor.ActorType;
 import com.stencyl.models.actor.Sprite;
 import com.stencyl.utils.Assets;
+import com.stencyl.utils.LazyArray;
 import com.stencyl.utils.LazyMap;
 
 import mbs.core.MbsObject;
@@ -84,7 +85,7 @@ class Data
 	//public var scenesTerrain:Map<Int,Dynamic>;
 
 	//Map of each resource in memory by ID
-	public var resources:LazyMap<Int,Resource>;
+	public var resources:LazyArray<Resource>;
 
 	//Map of each resource in memory by name
 	public var resourceMap:LazyMap<String,Resource>;
@@ -95,7 +96,8 @@ class Data
 	//Map of each behavior by ID
 	public var behaviors:LazyMap<Int,Behavior>;
 	
-
+	
+	private var highResourceID:Int = 0;
 	private var resourceLookup:Map<Int,Int> = null; //id -> address
 	private var resourceNameLookup:Map<String,Int> = null; //name -> id
 	private var behaviorLookup:Map<Int,Int> = null; //id -> address
@@ -131,13 +133,14 @@ class Data
 
 		resourceAssets = new Map<String,Dynamic>();
 		behaviors = LazyMap.fromFunction(loadBehaviorFromMbs);
-		resources = LazyMap.fromFunction(loadResourceFromMbs);
 		resourceMap = LazyMap.fromFunction(loadResourceFromMbsByName);
 
 		loadReaders();
 
 		scanBehaviorMbs();
 		scanResourceMbs();
+		
+		resources = new LazyArray(loadResourceFromMbs, highResourceID+1);
 	}
 	
 	private function loadReaders()
@@ -187,13 +190,17 @@ class Data
 			listReader.elementAddress += listReader.elementSize;
 
 			obj.setAddress(objAddress);
-			resourceLookup.set(obj.getId(), dynAddress);
+			var currentID = obj.getId();
+			resourceLookup.set(currentID, dynAddress);
+			
+			if(currentID > highResourceID)
+				highResourceID = currentID;
 			
 			var type = resourceListMbs.readTypecode(dynAddress);
 			if(type == MbsSprite.MBS_SPRITE)
-				resourceNameLookup.set("Sprite_" + obj.getName(), obj.getId());
+				resourceNameLookup.set("Sprite_" + obj.getName(), currentID);
 			else
-				resourceNameLookup.set(obj.getName(), obj.getId());
+				resourceNameLookup.set(obj.getName(), currentID);
 		}
 	}
 
@@ -252,7 +259,10 @@ class Data
 			{
 				var objAddress = resourceListMbs.readInt(dynAddress + intSize);
 				obj.setAddress(objAddress);
-				loadResourceFromMbs(obj.getId());
+				if(!resources.isLoaded(obj.getId()))
+				{
+					loadResourceFromMbs(obj.getId());
+				}
 			}
 			
 			listReader.elementAddress += listReader.elementSize;
@@ -280,6 +290,7 @@ class Data
 
 	private var actorTypesLoaded = false;
 	
+	@:access(com.stencyl.utils.LazyArray)
 	public function getAllActorTypes():Array<ActorType>
 	{
 		if(!actorTypesLoaded)
@@ -290,11 +301,11 @@ class Data
 
 		var a = new Array<ActorType>();
 		
-		for(r in resources)
+		for(i in 0...highResourceID)
 		{
-			if(Std.is(r, ActorType))
+			if(Std.is(resources.arr[i], ActorType))
 			{
-				a.push(cast(r, ActorType));
+				a.push(cast resources.arr[i]);
 			}
 		}
 		
@@ -359,10 +370,11 @@ class Data
 
 	public function reloadScaledResources():Void
 	{
-		for(r in resources)
+		for(i in 0...highResourceID)
 		{
-			if(r == null)
+			if(!resources.isLoaded(i))
 				continue;
+			var r = resources.get(i);
 			if(Std.is(r, Sound) || Std.is(r, ActorType))
 				continue;
 			if(!r.isAtlasActive())

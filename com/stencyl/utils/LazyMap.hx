@@ -8,6 +8,7 @@ import haxe.macro.Type;
 using haxe.macro.TypeTools;
 #end
 
+@:generic
 class LazyMap<K,V>
 {
 	macro public static function fromFunction<K,V>(e:Expr)
