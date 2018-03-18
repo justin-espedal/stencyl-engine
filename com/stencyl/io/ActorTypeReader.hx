@@ -9,8 +9,10 @@ import com.stencyl.io.mbs.actortype.MbsActorType;
 import com.stencyl.io.mbs.actortype.MbsActorType.*;
 import com.stencyl.behavior.BehaviorInstance;
 
+#if box2d
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2BodyDef;
+#end
 
 class ActorTypeReader implements AbstractReader
 {

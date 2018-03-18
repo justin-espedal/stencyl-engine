@@ -7,7 +7,6 @@ import com.stencyl.models.actor.ActorType;
 import com.stencyl.models.actor.Sprite;
 import com.stencyl.graphics.DynamicTileset;
 import com.stencyl.utils.Assets;
-import box2D.dynamics.B2FixtureDef;
 
 class Animation
 {

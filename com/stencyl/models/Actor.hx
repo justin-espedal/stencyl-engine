@@ -71,6 +71,7 @@ import motion.easing.Quint;
 import motion.easing.Sine;
 import motion.actuators.GenericActuator;
 
+#if box2d
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2BodyDef;
 import box2D.dynamics.B2Fixture;
@@ -86,6 +87,7 @@ import box2D.dynamics.contacts.B2ContactEdge;
 import box2D.common.math.B2Vec2;
 import box2D.common.math.B2Transform;
 import box2D.collision.B2WorldManifold;
+#end
 
 import com.stencyl.models.collision.CollisionInfo;
 import com.stencyl.models.collision.Grid;

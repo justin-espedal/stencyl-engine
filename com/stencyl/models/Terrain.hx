@@ -3,6 +3,7 @@ package com.stencyl.models;
 import com.stencyl.models.Actor;
 import com.stencyl.utils.Utils;
 
+#if box2d
 import box2D.collision.B2AABB;
 import box2D.common.math.B2Transform;
 import box2D.dynamics.B2Body;
@@ -11,6 +12,7 @@ import box2D.dynamics.B2FixtureDef;
 import box2D.collision.shapes.B2Shape;
 import box2D.collision.shapes.B2CircleShape;
 import box2D.collision.shapes.B2PolygonShape;
+#end
 
 class Terrain extends Actor
 {

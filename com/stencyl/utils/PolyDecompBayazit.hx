@@ -1,7 +1,10 @@
 package com.stencyl.utils;
 
 import openfl.geom.Point;
+
+#if box2d
 import box2D.common.math.B2Math;
+#end
 
 /*
 * Copyright (c) 2006-2007 Tim Kerchmar http://ptymn.blogspot.com/

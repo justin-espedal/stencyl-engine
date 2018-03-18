@@ -1,6 +1,9 @@
 package com.stencyl.models.scene;
 
+#if box2d
 import box2D.collision.shapes.B2Shape;
+#end
+
 import openfl.geom.Rectangle;
 
 class RegionDef

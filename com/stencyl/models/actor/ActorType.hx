@@ -4,7 +4,9 @@ import com.stencyl.behavior.BehaviorInstance;
 import com.stencyl.models.PhysicsMode;
 import com.stencyl.models.Resource;
 
+#if box2d
 import box2D.dynamics.B2BodyDef;
+#end
 
 class ActorType extends Resource
 {

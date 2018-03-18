@@ -3,8 +3,10 @@ package com.stencyl.models.actor;
 import com.stencyl.models.Actor;
 import com.stencyl.models.collision.Mask;
 
+#if box2d
 import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Fixture;
+#end
 
 import openfl.geom.Rectangle;
 

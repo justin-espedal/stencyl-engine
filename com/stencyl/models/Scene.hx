@@ -38,6 +38,8 @@ import com.stencyl.Engine;
 
 import openfl.display.BlendMode;
 import openfl.geom.Point;
+
+#if box2d
 import box2D.collision.shapes.B2Shape;
 import box2D.collision.shapes.B2EdgeShape;
 import box2D.collision.shapes.B2CircleShape;
@@ -49,6 +51,7 @@ import box2D.dynamics.joints.B2RevoluteJointDef;
 import box2D.dynamics.joints.B2LineJointDef;
 import box2D.common.math.B2Vec2;
 import box2D.common.math.B2Math;
+#end
 
 import haxe.ds.Vector;
 import haxe.xml.Fast;

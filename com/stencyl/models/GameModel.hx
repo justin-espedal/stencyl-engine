@@ -9,10 +9,12 @@ import com.stencyl.utils.Utils;
 import com.stencyl.models.scene.Autotile;
 import com.stencyl.models.scene.AutotileFormat;
 
+#if box2d
 import box2D.common.math.B2Vec2;
 import box2D.collision.shapes.B2Shape;
 import box2D.collision.shapes.B2PolygonShape;
 import box2D.collision.shapes.B2CircleShape;
+#end
 
 import openfl.geom.Point;
 

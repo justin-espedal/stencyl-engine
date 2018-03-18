@@ -8,6 +8,7 @@ import com.stencyl.models.Resource;
 import com.stencyl.models.actor.Sprite;
 import com.stencyl.models.actor.Animation;
 
+#if box2d
 import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2FixtureDef;
 import box2D.collision.B2AABB;
@@ -16,6 +17,7 @@ import box2D.collision.shapes.B2Shape;
 import box2D.collision.shapes.B2CircleShape;
 import box2D.collision.shapes.B2EdgeShape;
 import box2D.collision.shapes.B2PolygonShape;
+#end
 
 import haxe.ds.Vector;
 

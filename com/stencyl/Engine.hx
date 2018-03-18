@@ -80,26 +80,7 @@ import scripts.MyScripts;
 import motion.Actuate;
 import motion.easing.Elastic;
 
-import box2D.dynamics.B2World;
-import box2D.common.math.B2Vec2;
-import box2D.dynamics.joints.B2Joint;
-import box2D.dynamics.joints.B2DistanceJoint;
-import box2D.dynamics.joints.B2DistanceJointDef;
-import box2D.dynamics.joints.B2RevoluteJoint;
-import box2D.dynamics.joints.B2RevoluteJointDef;
-import box2D.dynamics.joints.B2LineJoint;
-import box2D.dynamics.joints.B2LineJointDef;
-import box2D.dynamics.B2DebugDraw;
-import box2D.dynamics.B2Body;
-import box2D.dynamics.B2BodyDef;
-import box2D.dynamics.B2FixtureDef;
-import box2D.collision.B2AABB;
-import box2D.collision.shapes.B2Shape;
-import box2D.collision.shapes.B2EdgeShape;
-import box2D.collision.shapes.B2PolygonShape;
-import box2D.collision.shapes.B2CircleShape;
-import box2D.dynamics.contacts.B2Contact;
-import box2D.dynamics.contacts.B2ContactEdge;
+import com.stencyl.physics.*;
 
 import haxe.ds.ObjectMap;
 import haxe.CallStack;
@@ -176,7 +157,7 @@ class Engine
 	//* Physics
 	//*-----------------------------------------------
 	
-	public var world:B2World;
+	public var world:World;
 	public var gravityX:Float;
 	public var gravityY:Float;
 	
@@ -233,7 +214,7 @@ class Engine
 	//Scene-Specific
 	public var regions:IntHashTable<Region>;
 	public var terrainRegions:Map<Int,Terrain>;
-	public var joints:Map<Int,B2Joint>;
+	public var joints:Map<Int,Joint>;
 	
 	public static var movieClip:MovieClip;
 	public static var stage:Stage;
@@ -343,7 +324,7 @@ class Engine
 	//*-----------------------------------------------
 	
 	public static var debug:Bool = false;
-	public static var debugDrawer:B2DebugDraw;
+	public static var debugDrawer:DebugDraw;
 	
 	
 	//*-----------------------------------------------
@@ -1024,7 +1005,7 @@ class Engine
 		regions.reuseIterator = true;
 		
 		terrainRegions = new Map<Int,Terrain>();
-		joints = new Map<Int,B2Joint>();
+		joints = new Map<Int,Joint>();
 		
 		dynamicTiles = new Map<String,Actor>();
 		animatedTiles = new Array<Tile>();
@@ -1195,55 +1176,10 @@ class Engine
 	
 	public function initPhysics()
 	{
-		var gravity:B2Vec2 = new B2Vec2(scene.gravityX, scene.gravityY);
-		world = new B2World(gravity, false);
+		world = new World(scene.gravityX, scene.gravityY);
+		world.setScreenBounds(0, 0, screenWidth / physicsScale, screenHeight / physicsScale);
 		
-		B2World.m_continuousPhysics = false;
-		B2World.m_warmStarting = true;
-		
-		var aabb:B2AABB = new B2AABB();
-		aabb.lowerBound.x = 0;
-		aabb.lowerBound.y = 0;
-		aabb.upperBound.x = screenWidth / physicsScale;
-		aabb.upperBound.y = screenHeight / physicsScale;
-		world.setScreenBounds(aabb);
-		
-		debugDrawer = new B2DebugDraw();
-		debugDrawer.setSprite(debugLayer);
-		debugDrawer.setLineThickness(3);
-		debugDrawer.setDrawScale(10 * SCALE);
-		debugDrawer.setFillAlpha(0);
-		debugDrawer.setFlags(B2DebugDraw.e_shapeBit | B2DebugDraw.e_jointBit);
-		world.setDebugDraw(debugDrawer);
-		
-		//---
-		
-		//TODO: Developers - uncomment this block out to turn on the edge shapes test case.
-		//Run on any blank game, blank scene - doesn't matter what it is.
-		/*var bodyDef:B2BodyDef = new B2BodyDef();
-		bodyDef.position.set(100/physicsScale, 100/physicsScale);
-		bodyDef.groupID = GameModel.TERRAIN_ID;
-		bodyDef.type = B2Body.b2_staticBody;
-		
-		var edge:B2EdgeShape = new B2EdgeShape(new B2Vec2(0, 0), new B2Vec2(130/physicsScale, 30/physicsScale));
-		
-		var fixtureDef:B2FixtureDef = new B2FixtureDef();
-		fixtureDef.shape = edge;
-		fixtureDef.density = 1;
-		fixtureDef.groupID = GameModel.TERRAIN_ID;
-		
-		var body:B2Body = world.createBody(bodyDef);
-		body.createFixture(fixtureDef);
-		
-		bodyDef.position.set(120/physicsScale, 10/physicsScale);
-		fixtureDef.shape = B2PolygonShape.asBox(1, 1);
-		//fixtureDef.shape = new B2CircleShape(1);
-		bodyDef.ignoreGravity = false;
-		bodyDef.groupID = 3;
-		fixtureDef.groupID = 3;
-		bodyDef.type = B2Body.b2_dynamicBody;
-		body = world.createBody(bodyDef);
-		body.createFixture(fixtureDef);*/
+		debugDrawer = world.getDebugDrawer(debugLayer);
 	}
 	
 	//*-----------------------------------------------
@@ -1346,10 +1282,10 @@ class Engine
 			var a2 = jd.actor2;
 			var collide = jd.collideConnected;
 			
-			var one:B2Body = null;
-			var two:B2Body = null;
+			var one:Body = null;
+			var two:Body = null;
 			
-			var pt:B2Vec2 = null;
+			var pt:Vec2 = null;
 			
 			//Types are defined in b2Joint.h
 			
@@ -1362,7 +1298,7 @@ class Engine
 			//HINGE
 			else if(jd.type == 1)
 			{
-				var r = cast(jd, B2RevoluteJointDef);
+				var r = cast(jd, RevoluteJointDef);
 				pt = getActor(a1).body.getLocalCenter().copy();
 				
 				pt.x = toPixelUnits(pt.x);
@@ -1400,7 +1336,7 @@ class Engine
 			//SLIDING
 			else if(jd.type == 2 || jd.type == 7)
 			{
-				var s = cast(jd, B2LineJointDef);
+				var s = cast(jd, LineJointDef);
 				pt = getActor(a1).body.getLocalCenter().copy();
 				
 				pt.x = toPixelUnits(pt.x);
@@ -2170,13 +2106,7 @@ class Engine
 		//Kill previous contacts
 		if(a.physicsMode == NORMAL_PHYSICS && a.body != null)
 		{
-			var contact:B2ContactEdge = a.body.getContactList();
-			
-			while(contact != null)
-			{	
-				engine.world.m_contactManager.m_contactListener.endContact(contact.contact);
-				contact = contact.next;
-			}
+			world.killContacts(a.body);
 		}
 		
 		a.removeAllListeners();
@@ -2416,11 +2346,13 @@ class Engine
 		
 		if(!NO_PHYSICS)
 		{
-			var aabb = world.getScreenBounds();
-			aabb.lowerBound.x = (Math.abs(cameraX / SCALE) - paddingLeft) / physicsScale;
-			aabb.lowerBound.y = (Math.abs(cameraY / SCALE) - paddingTop) / physicsScale;
-			aabb.upperBound.x = aabb.lowerBound.x + ((screenWidth + paddingRight + paddingLeft) / physicsScale);
-			aabb.upperBound.y = aabb.lowerBound.y + ((screenHeight + paddingBottom + paddingTop) / physicsScale);
+			world.setScreenBounds
+			(
+				(Math.abs(cameraX / SCALE) - paddingLeft) / physicsScale,
+				(Math.abs(cameraY / SCALE) - paddingTop) / physicsScale,
+				(screenWidth + paddingRight + paddingLeft) / physicsScale,
+				(screenHeight + paddingBottom + paddingTop) / physicsScale
+			);
 		}
 		
 		var inputx = Std.int(Input.mouseX / SCALE);
@@ -3517,7 +3449,7 @@ class Engine
 		return value;
 	}
 	
-	static public function vToPhysicalUnits(v:B2Vec2):B2Vec2
+	static public function vToPhysicalUnits(v:Vec2):Vec2
 	{
 		v.x = toPhysicalUnits(v.x);
 		v.y = toPhysicalUnits(v.y);
@@ -3525,7 +3457,7 @@ class Engine
 		return v;
 	}
 	
-	static public function vToPixelUnits(v:B2Vec2):B2Vec2
+	static public function vToPixelUnits(v:Vec2):Vec2
 	{
 		v.x = toPixelUnits(v.x);
 		v.y = toPixelUnits(v.y);
@@ -3535,12 +3467,12 @@ class Engine
 	
 	public inline function enableGlobalSleeping()
 	{
-		world.m_allowSleep = true;
+		world.setSleepingAllowed(true);
 	}
 	
 	public inline function disableGlobalSleeping()
 	{
-		world.m_allowSleep = false;
+		world.setSleepingAllowed(false);
 	}
 	
 	//*-----------------------------------------------
@@ -3590,19 +3522,19 @@ class Engine
 		return ID + 1;
 	}
 	
-	public function addJoint(j:B2Joint)
+	public function addJoint(j:Joint)
 	{
 		var nextID = nextJointID();
 		j.ID = nextID;
 		joints.set(nextID, j);
 	}
 	
-	public function getJoint(ID:Int):B2Joint
+	public function getJoint(ID:Int):Joint
 	{
 		return joints.get(ID);
 	}
 	
-	public function destroyJoint(j:B2Joint)
+	public function destroyJoint(j:Joint)
 	{
 		joints.remove(j.ID);
 		world.destroyJoint(j);
@@ -3612,13 +3544,13 @@ class Engine
 	
 	public function createStickJoint
 	(
-		one:B2Body, 
-		two:B2Body, 
+		one:Body, 
+		two:Body, 
 		jointID:Int = -1, 
 		collide:Bool = false, 
 		damping:Float = 0, 
 		frequencyHz:Float = 0
-	):B2DistanceJoint
+	):DistanceJoint
 	{
 		var v1 = one.getLocalCenter();
 		var v2 = two.getLocalCenter();
@@ -3638,7 +3570,7 @@ class Engine
 		v1 = one.getWorldPoint(v1);
 		v2 = two.getWorldPoint(v2);
 		
-		var jd = new B2DistanceJointDef();
+		var jd = new DistanceJointDef();
 		jd.initialize(one, two, v1, v2);
 		jd.collideConnected = collide;
 		jd.dampingRatio = damping;
@@ -3657,21 +3589,21 @@ class Engine
 			toReturn.ID = jointID;
 		}
 		
-		return cast(toReturn, B2DistanceJoint);
+		return cast(toReturn, DistanceJoint);
 	}
 	
 	public function createCustomStickJoint
 	(
-		one:B2Body,
+		one:Body,
 		x1:Float, 
 		y1:Float, 
-		two:B2Body, 
+		two:Body, 
 		x2:Float, 
 		y2:Float
-	):B2DistanceJoint
+	):DistanceJoint
 	{
-		var v1 = new B2Vec2(x1, y1);
-		var v2 = new B2Vec2(x2, y2);
+		var v1 = new Vec2(x1, y1);
+		var v2 = new Vec2(x2, y2);
 		
 		v1.x = toPhysicalUnits(v1.x);
 		v1.y = toPhysicalUnits(v1.y);
@@ -3681,22 +3613,22 @@ class Engine
 		v1 = one.getWorldPoint(v1);
 		v2 = two.getWorldPoint(v2);
 		
-		var jd = new B2DistanceJointDef();
+		var jd = new DistanceJointDef();
 		jd.initialize(one, two, v1, v2);
 		
 		var toReturn = world.createJoint(jd);
 		addJoint(toReturn);
 		
-		return cast(toReturn, B2DistanceJoint);
+		return cast(toReturn, DistanceJoint);
 	}
 	
 	//---
 	
 	public function createHingeJoint
 	(
-		one:B2Body, 
-		two:B2Body = null, 
-		pt:B2Vec2 = null, 
+		one:Body, 
+		two:Body = null, 
+		pt:Vec2 = null, 
 		jointID:Int = -1,
 		collide:Bool = false, 
 		limit:Bool = false, 
@@ -3705,7 +3637,7 @@ class Engine
 		upper:Float = 0, 
 		torque:Float = 0, 
 		speed:Float = 0
-	):B2RevoluteJoint
+	):RevoluteJoint
 	{
 		if(two == null)
 		{
@@ -3717,7 +3649,7 @@ class Engine
 			pt = one.getLocalCenter();
 		}
 	
-		var jd = new B2RevoluteJointDef();
+		var jd = new RevoluteJointDef();
 		
 		jd.bodyA = one;
 		jd.bodyB = two;
@@ -3748,16 +3680,16 @@ class Engine
 			toReturn.ID = jointID;
 		}
 		
-		return cast(toReturn, B2RevoluteJoint);
+		return cast(toReturn, RevoluteJoint);
 	}
 	
 	//---
 											
 	public function createSlidingJoint
 	(
-		one:B2Body, 
-		two:B2Body = null, 
-		dir:B2Vec2 = null, 
+		one:Body, 
+		two:Body = null, 
+		dir:Vec2 = null, 
 		jointID:Int = -1,
 		collide:Bool = false, 
 		limit:Bool = false, 
@@ -3766,7 +3698,7 @@ class Engine
 		upper:Float = 0, 
 		force:Float = 0, 
 		speed:Float = 0
-	):B2LineJoint
+	):LineJoint
 	{
 		if(two == null)
 		{
@@ -3775,7 +3707,7 @@ class Engine
 		
 		if(dir == null)
 		{
-			dir = new B2Vec2(1, 0);
+			dir = new Vec2(1, 0);
 		}
 	
 		dir.normalize();
@@ -3804,7 +3736,7 @@ class Engine
 			}
 		}
 		
-		var pjd = new B2LineJointDef();
+		var pjd = new LineJointDef();
 		pjd.initialize(one, two, pt1, dir);
 
 		pjd.collideConnected = collide;
@@ -3828,16 +3760,16 @@ class Engine
 			toReturn.ID = jointID;
 		}
 		
-		return cast(toReturn, B2LineJoint);
+		return cast(toReturn, LineJoint);
 	}
 			
 	//*-----------------------------------------------
 	//* Regions
 	//*-----------------------------------------------
 	
-	private function createRegion(x:Float, y:Float, shape:B2Shape, offset:Bool=false):Region
+	private function createRegion(x:Float, y:Float, shape:Shape, offset:Bool=false):Region
 	{
-		var shapeList = new Array<B2Shape>();
+		var shapeList = new Array<Shape>();
 		shapeList.push(shape);
 		var region = new Region(this, x, y, shapeList);
 		
@@ -3864,7 +3796,7 @@ class Engine
 			w = toPhysicalUnits(w);
 			h = toPhysicalUnits(h);
 			
-			var p = new B2PolygonShape();
+			var p = new PolygonShape();
 			p.setAsBox(w/2, h/2);
 			return createRegion(x, y, p, true);
 		}
@@ -3883,7 +3815,7 @@ class Engine
 		{
 			r = toPhysicalUnits(r);
 			
-			var cShape = new B2CircleShape();
+			var cShape = new CircleShape();
 			cShape.m_radius = r;
 			return createRegion(x, y, cShape, true);
 		}
@@ -3958,9 +3890,9 @@ class Engine
 	//* Terrain Regions
 	//*-----------------------------------------------
 	
-	private function createTerrainRegion(x:Float, y:Float, shape:B2Shape, offset:Bool=false, groupID:Int = 1):Terrain
+	private function createTerrainRegion(x:Float, y:Float, shape:Shape, offset:Bool=false, groupID:Int = 1):Terrain
 	{
-		var shapeList = new Array<B2Shape>();
+		var shapeList = new Array<Shape>();
 		shapeList.push(shape);
 		var region = new Terrain(this, x, y, shapeList, groupID);
 		
@@ -3978,7 +3910,7 @@ class Engine
 		w = toPhysicalUnits(w);
 		h = toPhysicalUnits(h);
 	
-		var p = new B2PolygonShape();
+		var p = new PolygonShape();
 		p.setAsBox(w/2, h/2);
 		
 		return createTerrainRegion(x, y, p, true, groupID);
@@ -3988,7 +3920,7 @@ class Engine
 	{
 		r = toPhysicalUnits(r);
 		
-		var cShape = new B2CircleShape();
+		var cShape = new CircleShape();
 		cShape.m_radius = r;
 		
 		return createTerrainRegion(x, y, cShape, true, groupID);
