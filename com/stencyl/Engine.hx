@@ -132,6 +132,7 @@ class Engine
 	public static var isIPhone6Plus:Bool = false;
 	public static var isIPhoneX:Bool = false;
 	public static var isIPhoneXMax:Bool = false;
+	public static var isIPhoneXR:Bool = false;
 	public static var isTabletIOS:Bool = false;
 	
 	
