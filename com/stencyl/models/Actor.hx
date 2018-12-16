@@ -4354,6 +4354,24 @@ class Actor extends #if (use_actor_tilemap) TileContainer #else Sprite #end
 	
 	private function clearCollidedList()
 	{
+		//collidedList is accessed in collideTypes and getAllCollisionInfo
+		//those are both only called within moveActorBy, after calling clearCollidedList
+		
+		//clearCollidedList, then
+		//collideTypes may happen just once or repeatedly until the result is non-null, often followed by
+		//getAllCollisionInfo, after which clearCollidedList should be called again.
+		
+		//getAllCollisionInfo calls addCollision, which calls alreadyCollided
+		
+		//clearCollisionInfoList marks all simpleCollisions and linked collisions as removed, but doesn't remove them
+		//addCollision may add a new collision to simpleCollisions at collisionsCount, or replace an existing key
+		//alreadyCollided just loops over simpleCollisions and checks if a collision seems to already exist there.
+		//handleCollisionsSimple is where simpleCollisions is looped over, ignoring nulls and removeds, and calls events
+		//finally, actually get rid of "removed" collisions in disposeRemovedCollisionInfo
+		
+		//clearCollisionInfoList happens at the beginning of moveActorBy (which can happen multiple times in a step)
+		//addCollision and alreadyCollided happen afterward, perhaps multiple times, within moveActorBy
+		
 		while (collidedList.length > 0)
 		{
 			collidedList.pop();
@@ -4390,8 +4408,12 @@ class Actor extends #if (use_actor_tilemap) TileContainer #else Sprite #end
 	
 	public function alreadyCollided(info2:Collision):Int
 	{
+		var i = 0;
+		
 		for (key in simpleCollisions.keys())
 		{
+			++i;
+			
 			var info:Collision = simpleCollisions.get(key);
 			
 			if (info != null && ((info.maskA == info2.maskA && info.maskB == info2.maskB) || (info.maskA == info2.maskB && info.maskB == info2.maskA)))			
@@ -4399,12 +4421,16 @@ class Actor extends #if (use_actor_tilemap) TileContainer #else Sprite #end
 				// added to avoid up/down tile collisions from overwriting left/right tile collisions since each tile is not its own unique object
 				if (info.solidCollision)
 				{
+					trace("SOLID");
 					if (info.maskA.groupID == 1 || info.maskB.groupID == 1)
 					{
+						trace("ONE IS A TILE");
 						if (info.thisFromLeft || info.thisFromRight)
 						{
 							if (info2.thisFromLeft || info2.thisFromRight)
 							{
+								trace("BOTH LR");
+								trace(i);
 								return key;
 							}
 						}
@@ -4413,22 +4439,28 @@ class Actor extends #if (use_actor_tilemap) TileContainer #else Sprite #end
 						{
 							if (info2.thisFromTop || info2.thisFromBottom)
 							{
+								trace("BOTH TB");
+								trace(i);
 								return key;
 							}
 						}
 					}
 					else
 					{
+						trace("NEITHER IS A TILE");
+						trace(i);
 						return key;
 					}
 				}
 				else
 				{
+					trace(i);
 					return key;
 				}
 			}
 		}
 		
+		trace(i);
 		return -1;
 	}
 	
@@ -4518,7 +4550,7 @@ class Actor extends #if (use_actor_tilemap) TileContainer #else Sprite #end
 			return;
 		}		
 		
-		clearCollisionInfoList();		
+		clearCollisionInfoList();
 		
 		if (!noCollision && collidable && HITBOX.collideTypes != null)
 		{
