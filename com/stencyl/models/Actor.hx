@@ -830,11 +830,12 @@ class Actor extends #if use_actor_tilemap TileContainer #else Sprite #end
 		{
 			try
 			{
-				var f:Array<Dynamic>->Void = whenCreatedListeners[r];			
-				f(whenCreatedListeners);
+				var c:Callable<Void->Void> = whenCreatedListeners[r];
+				c.f();
 				
-				if(Utils.indexOf(whenCreatedListeners, f) == -1)
+				if(c.finished)
 				{
+					whenCreatedListeners.remove(c);
 					r--;
 				}
 			}
