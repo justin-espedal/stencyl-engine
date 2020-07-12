@@ -376,6 +376,12 @@ class Script
 	{
 	}
 	
+	#if stencyltools
+	public function reloadField(fieldName:String, value:Dynamic)
+	{
+	}
+	#end
+	
 	public function clearListeners()
 	{
 		propertyChangeListeners = new Map<String,Dynamic>();
@@ -504,21 +510,35 @@ class Script
 	}
 	
 	public function addWhenCreatedListener(a:Actor, func:CFunction<Void->Void>)
-	{			
+	{
 		var isActorScript = Std.is(this, ActorScript);
 		var callable = asCallable(func);
 		
 		if(a == null)
 		{
-			trace("Error in " + wrapper.classname + ": Cannot add listener function to null actor.");
-			return;
+			if(isActorScript)
+			{
+				a = cast(this, ActorScript).actor;
+			}
+		}
+								
+		var listeners:Array<Dynamic>;
+		
+		if(a != null)
+		{
+			listeners = a.whenCreatedListeners;				
+		}	
+				
+		else
+		{
+			listeners = engine.whenCreatedListeners;
 		}
 		
-		a.whenCreatedListeners.push(callable);
+		listeners.push(callable);
 		
 		if(isActorScript)
 		{
-			cast(this, ActorScript).actor.registerListener(a.whenCreatedListeners, callable);
+			cast(this, ActorScript).actor.registerListener(listeners, callable);
 		}
 	}
 	

@@ -129,6 +129,7 @@ class Callable<T>
 			for(script in BehaviorManager.liveScripts.get(className))
 			{
 				if(script.interp == null) script.initHscript();
+				//script.reloadField(methodName, script.interp.asFunction(ct.expr));
 				Reflect.setField(script, methodName, script.interp.asFunction(ct.expr));
 			}
 		}

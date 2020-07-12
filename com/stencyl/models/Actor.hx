@@ -41,6 +41,7 @@ import com.stencyl.graphics.fonts.Label;
 import com.stencyl.behavior.Behavior;
 import com.stencyl.behavior.BehaviorInstance;
 import com.stencyl.behavior.BehaviorManager;
+import com.stencyl.behavior.Callable;
 import com.stencyl.behavior.TimedTask;
 
 import com.stencyl.models.actor.Group;
@@ -846,7 +847,7 @@ class Actor extends #if use_actor_tilemap TileContainer #else Sprite #end
 			}
 			
 			r++;
-		}			
+		}
 	}
 	
 	static public function createBox(width:Float, height:Float):B2PolygonShape

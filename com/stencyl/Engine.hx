@@ -377,7 +377,8 @@ class Engine
 	public var collisionListeners:Map<Int, Map<Int, Array<Dynamic>>>;
 	public var soundListeners:Map<Sound, Array<Dynamic>>;
 	public var channelListeners:Map<Int, Array<Dynamic>>;
-			
+	
+	public var whenCreatedListeners:Array<Dynamic>;
 	public var whenUpdatedListeners:Array<Dynamic>;
 	public var whenDrawingListeners:Array<Dynamic>;
 	public var whenMousePressedListeners:Array<Dynamic>;
@@ -1130,6 +1131,7 @@ class Engine
 		channelListeners = new Map<Int, Array<Dynamic>>();
 		nativeListeners = new Array<NativeListener>();
 		
+		whenCreatedListeners = new Array<Dynamic>();
 		whenUpdatedListeners = new Array<Dynamic>();
 		whenDrawingListeners = new Array<Dynamic>();
 		whenMousePressedListeners = new Array<Dynamic>();
@@ -1272,6 +1274,8 @@ class Engine
 		if(initialize)
 		{
 			manager.initScripts();
+			
+			invokeListeners(engine.whenCreatedListeners);
 		}
 	}
 	
@@ -1854,7 +1858,8 @@ class Engine
 		collisionListeners = null;
 		soundListeners = null;
 		channelListeners = null;
-					
+		
+		whenCreatedListeners = null;			
 		whenUpdatedListeners = null;
 		whenDrawingListeners = null;
 		whenMousePressedListeners = null;
