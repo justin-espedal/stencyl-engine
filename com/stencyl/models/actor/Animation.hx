@@ -255,7 +255,7 @@ class Animation
 		}
 	}
 	
-	public inline function update(elapsedTime:Float)
+	public function update(elapsedTime:Float)
 	{
 		sharedTimer += elapsedTime;
 		
