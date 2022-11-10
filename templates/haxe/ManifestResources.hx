@@ -171,13 +171,8 @@ import sys.FileSystem;
 				}
 			::end::
 		::end::
-	::end::
-::end::
-
-::if (assets != null)::
-	::foreach assets::
-		::if (!embed)::
-			::if (type == "font")::
+		::if (type == "font")::
+			::if (!embed)::
 				@:keep
 				@:noCompletion
 				class __ASSET__::flatName:: extends lime.text.Font
@@ -200,11 +195,38 @@ import sys.FileSystem;
 					}
 				}
 			::end::
+
+			@:keep
+			@:expose('__ASSET__OPENFL__::flatName::')
+			@:noCompletion
+			class __ASSET__OPENFL__::flatName:: extends openfl.text.Font
+			{
+				public function new ()
+				{
+					::if (embed)::
+						__fromLimeFont (new __ASSET__::flatName:: ());
+					::else::
+						::if (targetPath != null)::
+							__fontPath = ManifestResources.rootPath + "::targetPath::";
+						::else::
+							::if (library != null)::
+								__fontID = "::library:: : ::id::";
+							::else::
+								__fontID = "::id::";
+							::end::
+						::end::
+						::if (fontName)::
+							name = "::fontName::";
+						::end::
+					::end::
+					super ();
+				}
+			}
 		::end::
 	::end::
 ::end::
 
-#else //end (flash || desktop || cpp)
+#elseif html5 //end (flash || desktop || cpp)
 
 ::if (assets != null)::
 	::foreach assets::
@@ -233,18 +255,7 @@ import sys.FileSystem;
 					super ();
 				}
 			}
-		::end::
-	::end::
-::end::
 
-#end //end (flash || desktop || cpp || ...)
-
-#if (!flash)
-
-#if html5
-::if (assets != null)::
-	::foreach assets::
-		::if (type == "font")::
 			@:keep
 			@:expose('__ASSET__OPENFL__::flatName::')
 			@:noCompletion
@@ -265,42 +276,8 @@ import sys.FileSystem;
 		::end::
 	::end::
 ::end::
-#else //end (html5)
-::if (assets != null)::
-	::foreach assets::
-		::if (type == "font")::
-			@:keep
-			@:expose('__ASSET__OPENFL__::flatName::')
-			@:noCompletion
-			class __ASSET__OPENFL__::flatName:: extends openfl.text.Font
-			{
-				public function new ()
-				{
-					::if (embed)::
-						__fromLimeFont (new __ASSET__::flatName:: ());
-					::else::
-						::if (targetPath != null)::
-							__fontPath = ManifestResources.rootPath + "::targetPath::";
-						::else::
-							::if (library != null)::
-								__fontID = "::library:: : ::id::";
-							::else::
-								__fontID = "::id::";
-							::end::
-						::end::
-						::if (fontName)::
-							name = "::fontName::";
-						::end::
-					::end::
-					super ();
-				}
-			}
-		::end::
-	::end::
-::end::
-#end //end (html5 || ...)
+#end //end (flash || desktop || cpp || html5)
 
-#end //end (!flash)
 #end //end (!display)
 
 #end //end (!disable_preloader_assets)
