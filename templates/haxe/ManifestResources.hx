@@ -62,62 +62,43 @@ import sys.FileSystem;
 
 		var data, manifest, library, bundle;
 
-		#if kha
-
-			::manifest::
-			library = AssetLibrary.fromManifest (manifest);
-			Assets.registerLibrary ("::library::", library);
-
-			if (library != null) preloadLibraries.push (library);
-			else preloadLibraryNames.push ("::library::");
-
-		#else //end (kha)
-
-			::if (assets != null)::
-				::foreach assets::
-					::if (type == "manifest")::
-						::if (embed)::
-							data = '::data::';
-							manifest = AssetManifest.parse (data, rootPath);
-							library = AssetLibrary.fromManifest (manifest);
-							Assets.registerLibrary ("::library::", library);
-						::else::
-							Assets.libraryPaths["::library::"] = rootPath + "::resourceName::";
-						::end::
+		::if (assets != null)::
+			::foreach assets::
+				::if (type == "manifest")::
+					::if (embed)::
+						data = '::data::';
+						manifest = AssetManifest.parse (data, rootPath);
+						library = AssetLibrary.fromManifest (manifest);
+						Assets.registerLibrary ("::library::", library);
+					::else::
+						Assets.libraryPaths["::library::"] = rootPath + "::resourceName::";
 					::end::
-					::if (type == "bundle")::
-						::if (embed)::
-							bundle = AssetBundle.fromBytes(#if flash Bytes.ofData(new __ASSET__::flatName::() #else new __ASSET__::flatName::() #end));
-							library = AssetLibrary.fromBundle(bundle);
-							Assets.registerLibrary("::library::", library);
-						::else::
-							Assets.bundlePaths["::library::"] = rootPath + "::resourceName::";
-						::end::
+				::end::
+				::if (type == "bundle")::
+					::if (embed)::
+						bundle = AssetBundle.fromBytes(#if flash Bytes.ofData(new __ASSET__::flatName::() #else new __ASSET__::flatName::() #end));
+						library = AssetLibrary.fromBundle(bundle);
+						Assets.registerLibrary("::library::", library);
+					::else::
+						Assets.bundlePaths["::library::"] = rootPath + "::resourceName::";
 					::end::
 				::end::
 			::end::
+		::end::
 
-			::foreach libraries::
-				::if (preload)::
-					library = Assets.getLibrary ("::name::");
-					if (library != null) preloadLibraries.push (library);
-					else preloadLibraryNames.push ("::name::");
-				::end::
+		::foreach libraries::
+			::if (preload)::
+				library = Assets.getLibrary ("::name::");
+				if (library != null) preloadLibraries.push (library);
+				else preloadLibraryNames.push ("::name::");
 			::end::
-
-		#end
+		::end::
 
 	}
 
 
 }
 
-
-#if kha
-
-::images::
-
-#else //end (kha)
 
 #if !display
 #if flash
@@ -321,7 +302,5 @@ import sys.FileSystem;
 
 #end //end (openfl && !flash)
 #end //end (!display)
-
-#end //end (kha || ...)
 
 #end //end (!disable_preloader_assets)
