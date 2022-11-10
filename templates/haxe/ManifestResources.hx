@@ -65,23 +65,10 @@ import sys.FileSystem;
 		::if (assets != null)::
 			::foreach assets::
 				::if (type == "manifest")::
-					::if (embed)::
-						data = '::data::';
-						manifest = AssetManifest.parse (data, rootPath);
-						library = AssetLibrary.fromManifest (manifest);
-						Assets.registerLibrary ("::library::", library);
-					::else::
-						Assets.libraryPaths["::library::"] = rootPath + "::resourceName::";
-					::end::
+					Assets.libraryPaths["::library::"] = rootPath + "::resourceName::";
 				::end::
 				::if (type == "bundle")::
-					::if (embed)::
-						bundle = AssetBundle.fromBytes(#if flash Bytes.ofData(new __ASSET__::flatName::() #else new __ASSET__::flatName::() #end));
-						library = AssetLibrary.fromBundle(bundle);
-						Assets.registerLibrary("::library::", library);
-					::else::
-						Assets.bundlePaths["::library::"] = rootPath + "::resourceName::";
-					::end::
+					Assets.bundlePaths["::library::"] = rootPath + "::resourceName::";
 				::end::
 			::end::
 		::end::
@@ -103,43 +90,10 @@ import sys.FileSystem;
 #if !display
 #if flash
 
-::foreach assets::
-	::if (embed != false)::
-		@:keep
-		@:bind
-		@:noCompletion
-		::if (type == "image")::
-			class __ASSET__::flatName:: extends flash.display.BitmapData { public function new () { super (0, 0, true, 0);} }
-		::else::
-			class __ASSET__::flatName:: extends ::flashClass:: {}
-		::end::
-	::end::
-::end::
-
 #elseif (desktop || cpp) //end (flash)
 
 ::if (assets != null)::
 	::foreach assets::
-		::if (embed)::
-			@:keep
-			@:noCompletion
-			::if (type == "image")::
-				@:image("::sourcePath::")
-				class __ASSET__::flatName:: extends lime.graphics.Image {}
-			::elseif (type == "sound")::
-				@:file("::sourcePath::")
-				class __ASSET__::flatName:: extends haxe.io.Bytes {}
-			::elseif (type == "music")::
-				@:file("::sourcePath::")
-				class __ASSET__::flatName:: extends haxe.io.Bytes {}
-			::elseif (type == "font")::
-				@:font("::sourcePath::")
-				class __ASSET__::flatName:: extends lime.text.Font {}
-			::else::
-				@:file("::sourcePath::")
-				class __ASSET__::flatName:: extends haxe.io.Bytes {}
-			::end::
-		::end::
 		::if (type == "font")::
 			::if (!embed)::
 				@:keep
@@ -172,21 +126,17 @@ import sys.FileSystem;
 			{
 				public function new ()
 				{
-					::if (embed)::
-						__fromLimeFont (new __ASSET__::flatName:: ());
+					::if (targetPath != null)::
+						__fontPath = ManifestResources.rootPath + "::targetPath::";
 					::else::
-						::if (targetPath != null)::
-							__fontPath = ManifestResources.rootPath + "::targetPath::";
+						::if (library != null)::
+							__fontID = "::library:: : ::id::";
 						::else::
-							::if (library != null)::
-								__fontID = "::library:: : ::id::";
-							::else::
-								__fontID = "::id::";
-							::end::
+							__fontID = "::id::";
 						::end::
-						::if (fontName)::
-							name = "::fontName::";
-						::end::
+					::end::
+					::if (fontName)::
+						name = "::fontName::";
 					::end::
 					super ();
 				}
@@ -232,12 +182,8 @@ import sys.FileSystem;
 			{
 				public function new ()
 				{
-					::if (embed)::
-						__fromLimeFont (new __ASSET__::flatName:: ());
-					::else::
-						::if (fontName)::
-							name = "::fontName::";
-						::end::
+					::if (fontName)::
+						name = "::fontName::";
 					::end::
 					super ();
 				}
