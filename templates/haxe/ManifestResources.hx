@@ -128,7 +128,7 @@ import sys.FileSystem;
 			@:keep
 			@:bind
 			@:noCompletion
-			#if display private #end class __ASSET__::flatName:: extends flash.display.BitmapData
+			class __ASSET__::flatName:: extends flash.display.BitmapData
 			{
 				public function new ()
 				{
@@ -139,7 +139,7 @@ import sys.FileSystem;
 			@:keep
 			@:bind
 			@:noCompletion
-			#if display private #end class __ASSET__::flatName:: extends ::flashClass::
+			class __ASSET__::flatName:: extends ::flashClass::
 			{
 
 			}
@@ -156,35 +156,35 @@ import sys.FileSystem;
 			::if (type == "image")::
 				@:image("::sourcePath::")
 				@:noCompletion
-				#if display private #end class __ASSET__::flatName:: extends lime.graphics.Image
+				class __ASSET__::flatName:: extends lime.graphics.Image
 				{
 
 				}
 			::elseif (type == "sound")::
 				@:file("::sourcePath::")
 				@:noCompletion
-				#if display private #end class __ASSET__::flatName:: extends haxe.io.Bytes
+				class __ASSET__::flatName:: extends haxe.io.Bytes
 				{
 
 				}
 			::elseif (type == "music")::
 				@:file("::sourcePath::")
 				@:noCompletion
-				#if display private #end class __ASSET__::flatName:: extends haxe.io.Bytes
+				class __ASSET__::flatName:: extends haxe.io.Bytes
 				{
 
 				}
 			::elseif (type == "font")::
 				@:font("::sourcePath::")
 				@:noCompletion
-				#if display private #end class __ASSET__::flatName:: extends lime.text.Font
+				class __ASSET__::flatName:: extends lime.text.Font
 				{
 
 				}
 			::else::
 				@:file("::sourcePath::")
 				@:noCompletion
-				#if display private #end class __ASSET__::flatName:: extends haxe.io.Bytes
+				class __ASSET__::flatName:: extends haxe.io.Bytes
 				{
 
 				}
@@ -199,7 +199,7 @@ import sys.FileSystem;
 			::if (type == "font")::
 				@:keep
 				@:noCompletion
-				#if display private #end class __ASSET__::flatName:: extends lime.text.Font
+				class __ASSET__::flatName:: extends lime.text.Font
 				{
 					public function new ()
 					{
@@ -231,7 +231,7 @@ import sys.FileSystem;
 			@:keep
 			@:expose('__ASSET__::flatName::')
 			@:noCompletion
-			#if display private #end class __ASSET__::flatName:: extends lime.text.Font
+			class __ASSET__::flatName:: extends lime.text.Font
 			{
 				public function new ()
 				{
@@ -267,7 +267,7 @@ import sys.FileSystem;
 			@:keep
 			@:expose('__ASSET__OPENFL__::flatName::')
 			@:noCompletion
-			#if display private #end class __ASSET__OPENFL__::flatName:: extends openfl.text.Font
+			class __ASSET__OPENFL__::flatName:: extends openfl.text.Font
 			{
 				public function new ()
 				{
@@ -291,7 +291,7 @@ import sys.FileSystem;
 			@:keep
 			@:expose('__ASSET__OPENFL__::flatName::')
 			@:noCompletion
-			#if display private #end class __ASSET__OPENFL__::flatName:: extends openfl.text.Font
+			class __ASSET__OPENFL__::flatName:: extends openfl.text.Font
 			{
 				public function new ()
 				{
