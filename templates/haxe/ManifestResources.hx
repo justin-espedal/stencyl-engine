@@ -50,7 +50,7 @@ import sys.FileSystem;
 
 		}
 
-		#if (openfl && !flash && !display)
+		#if (!flash && !display)
 		::if (assets != null)::
 			::foreach assets::
 				::if (type == "font")::
@@ -239,7 +239,7 @@ import sys.FileSystem;
 
 #end //end (flash || desktop || cpp || ...)
 
-#if (openfl && !flash)
+#if (!flash)
 
 #if html5
 ::if (assets != null)::
@@ -300,7 +300,7 @@ import sys.FileSystem;
 ::end::
 #end //end (html5 || ...)
 
-#end //end (openfl && !flash)
+#end //end (!flash)
 #end //end (!display)
 
 #end //end (!disable_preloader_assets)
