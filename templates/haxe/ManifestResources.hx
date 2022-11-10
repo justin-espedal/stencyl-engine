@@ -105,25 +105,13 @@ import sys.FileSystem;
 
 ::foreach assets::
 	::if (embed != false)::
+		@:keep
+		@:bind
+		@:noCompletion
 		::if (type == "image")::
-			@:keep
-			@:bind
-			@:noCompletion
-			class __ASSET__::flatName:: extends flash.display.BitmapData
-			{
-				public function new ()
-				{
-					super (0, 0, true, 0);
-				}
-			}
+			class __ASSET__::flatName:: extends flash.display.BitmapData { public function new () { super (0, 0, true, 0);} }
 		::else::
-			@:keep
-			@:bind
-			@:noCompletion
-			class __ASSET__::flatName:: extends ::flashClass::
-			{
-
-			}
+			class __ASSET__::flatName:: extends ::flashClass:: {}
 		::end::
 	::end::
 ::end::
@@ -134,41 +122,22 @@ import sys.FileSystem;
 	::foreach assets::
 		::if (embed)::
 			@:keep
+			@:noCompletion
 			::if (type == "image")::
 				@:image("::sourcePath::")
-				@:noCompletion
-				class __ASSET__::flatName:: extends lime.graphics.Image
-				{
-
-				}
+				class __ASSET__::flatName:: extends lime.graphics.Image {}
 			::elseif (type == "sound")::
 				@:file("::sourcePath::")
-				@:noCompletion
-				class __ASSET__::flatName:: extends haxe.io.Bytes
-				{
-
-				}
+				class __ASSET__::flatName:: extends haxe.io.Bytes {}
 			::elseif (type == "music")::
 				@:file("::sourcePath::")
-				@:noCompletion
-				class __ASSET__::flatName:: extends haxe.io.Bytes
-				{
-
-				}
+				class __ASSET__::flatName:: extends haxe.io.Bytes {}
 			::elseif (type == "font")::
 				@:font("::sourcePath::")
-				@:noCompletion
-				class __ASSET__::flatName:: extends lime.text.Font
-				{
-
-				}
+				class __ASSET__::flatName:: extends lime.text.Font {}
 			::else::
 				@:file("::sourcePath::")
-				@:noCompletion
-				class __ASSET__::flatName:: extends haxe.io.Bytes
-				{
-
-				}
+				class __ASSET__::flatName:: extends haxe.io.Bytes {}
 			::end::
 		::end::
 		::if (type == "font")::
