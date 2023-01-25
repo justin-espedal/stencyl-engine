@@ -4,28 +4,25 @@ import openfl.display.BitmapData;
 import openfl.display.Bitmap;
 #if !use_actor_tilemap
 import openfl.display.Sprite;
+import openfl.geom.Point;
 #else
 import openfl.display.Tile;
-import openfl.display.TileContainer;
 #end
-import openfl.geom.Point;
 
 import com.stencyl.Engine;
 import com.stencyl.utils.motion.*;
 import com.stencyl.utils.Utils;
 
-class BitmapWrapper extends #if use_actor_tilemap TileContainer #else Sprite #end implements EngineScaleUpdateListener
+class BitmapWrapper extends #if use_actor_tilemap Tile #else Sprite implements EngineScaleUpdateListener #end
 {
 	#if !use_actor_tilemap
 	public var img:Bitmap;
-	#else
-	public var img:Tile;
-	#end
 
 	private var offsetX:Float;
 	private var offsetY:Float;
 
 	public var cacheParentAnchor:Point = Utils.zero;
+	#end
 	
 	@:isVar public var smoothing (get, set):Bool;
 	@:isVar public var imgX (get, set):Float;
@@ -37,8 +34,10 @@ class BitmapWrapper extends #if use_actor_tilemap TileContainer #else Sprite #en
 	{
 		super();
 		
+		#if !use_actor_tilemap
 		offsetX = 0;
 		offsetY = 0;
+		#end
 		
 		if(img != null)
 		{
@@ -100,25 +99,27 @@ class BitmapWrapper extends #if use_actor_tilemap TileContainer #else Sprite #en
 			}
 		}
 
-		var tile = new Tile();
-		tile.tileset = tilesetMapping.tileset.tileset;
-		tile.id = tilesetMapping.frameIndexOffset;
-		initializeFromTile(tile);
-
+		tileset = tilesetMapping.tileset.tileset;
+		id = tilesetMapping.frameIndexOffset;
+		
 		#end
 	}
 
 	#if use_actor_tilemap
 	private function initializeFromTile(tile:Tile)
 	{
-		this.img = tile;
-		addTile(this.img);
+		tileset = tile.tileset;
+		id = tile.id;
 	}
 	#end
 
 	public function set_imgX(x:Float):Float
 	{
+		#if !use_actor_tilemap
 		this.x = (x + offsetX) * Engine.SCALE - cacheParentAnchor.x;
+		#else
+		this.x = x;
+		#end
 
 		return imgX = x;
 	}
@@ -130,7 +131,11 @@ class BitmapWrapper extends #if use_actor_tilemap TileContainer #else Sprite #en
 
 	public function set_imgY(y:Float):Float
 	{
+		#if !use_actor_tilemap
 		this.y = (y + offsetY) * Engine.SCALE - cacheParentAnchor.y;
+		#else
+		this.y = y;
+		#end
 
 		return imgY = y;
 	}
@@ -160,6 +165,7 @@ class BitmapWrapper extends #if use_actor_tilemap TileContainer #else Sprite #en
 
 	public function setOrigin(x:Float, y:Float):Void
 	{
+		#if !use_actor_tilemap
 		this.x += (x - offsetX) * Engine.SCALE;
 		this.y += (y - offsetY) * Engine.SCALE;
 		offsetX = x;
@@ -167,8 +173,13 @@ class BitmapWrapper extends #if use_actor_tilemap TileContainer #else Sprite #en
 
 		img.x = -x * Engine.SCALE;
 		img.y = -y * Engine.SCALE;
+		#else
+		this.originX = x;
+		this.originY = y;
+		#end
 	}
 
+	#if !use_actor_tilemap
 	public function updateScale():Void
 	{
 		updatePosition();
@@ -179,6 +190,7 @@ class BitmapWrapper extends #if use_actor_tilemap TileContainer #else Sprite #en
 		x = (imgX + offsetX) * Engine.SCALE - cacheParentAnchor.x;
 		y = (imgY + offsetY) * Engine.SCALE - cacheParentAnchor.y;
 	}
+	#end
 	
 	public function get_tweenProps():BitmapTweenProperties
 	{

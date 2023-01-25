@@ -2381,7 +2381,9 @@ class Script
 				#end
 			}
 			
+			#if !use_actor_tilemap
 			img.cacheParentAnchor = a.cacheAnchor;
+			#end
 			img.imgX = x;
 			img.imgY = y;
 			img.smoothing = Config.antialias;

@@ -1395,10 +1395,12 @@ class Actor extends #if use_actor_tilemap TileContainer #else Sprite #end
 		if(!newAnchor.equals(cacheAnchor))
 		{
 			cacheAnchor.copyFrom(newAnchor);
+			#if !use_actor_tilemap
 			for(img in attachedImages)
 			{
 				img.updatePosition();
 			}
+			#end
 			if(label != null)
 			{
 				label.updatePosition();
@@ -1410,8 +1412,8 @@ class Actor extends #if use_actor_tilemap TileContainer #else Sprite #end
 	{
 		for(b in attachedImages)
 		{
-			b.cacheParentAnchor = Utils.zero;
 			#if !use_actor_tilemap
+			b.cacheParentAnchor = Utils.zero;
 			removeChild(b);
 			#else
 			removeTile(b);
