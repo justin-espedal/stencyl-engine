@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stencyl-addons>
+
+	<named-class-addon target="stencyl-preloaders">
+		<class name="default" label="@/globals.default" classname="com.stencyl.loader.StencylPreloader" id="0" />
+		<class name="customSwf" label="@/web.swf" classname="com.stencyl.loader.CustomSwfPreloader" id="1" />
+		<class name="customHaxe" label="@/web.custom.haxe" classname="scripts.StencylPreloader" id="4" />
+	</named-class-addon>
+	
+	<property-page-addon target="stencyl.preloader">
+		<header label="@/web.swf.title" />
+		<field name="swfLoc" label="@/globals.loc" hint="@/web.swf.title.info" />
+		<field name="swfX" label="@/globals.xpos" editor="spinner" unit="px" />
+		<field name="swfY" label="@/globals.ypos" editor="spinner" unit="px" />
+		<field name="swfWidth" label="@/globals.width" editor="spinner" unit="px" />
+		<field name="swfHeight" label="@/globals.height" editor="spinner" unit="px" />
+	</property-page-addon>
+
+</stencyl-addons>

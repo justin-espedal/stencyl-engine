@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<game-data>
+	<config classname="com.stencyl.loader.SwfPreloaderConfig" on="game">
+		<!--type=file gives us an embedded config file saved at $embeddedPath, which can be loaded with Util.loadConfigBytes-->
+		<field name="swfLoc" type="file" embeddedPath="config/preloader.swf" />
+		<field name="swfX" type="int" />
+		<field name="swfY" type="int" />
+		<field name="swfWidth" type="int" />
+		<field name="swfHeight" type="int" />
+	</config>
+	<config classname="com.stencyl.loader.PreloaderConfig" on="game">
+		<field name="lockURL" type="text" embedded="true" />
+		<field name="authorURL" type="text" embedded="true" />
+
+		<field name="backgroundColor" type="color" />
+		<!--
+		backgroundImage is stored as "preloader.png" in the game folder
+		<field name="backgroundImage" type="image" path="preloader.png" optional="true" />
+
+		badgeImage is a special case related to branding and subscriptions.
+		It's determined by splashStyle, excluded if the user is a subscriber, with the image being loaded from the toolset.
+		<field name="badgeImage" type="image" optional="true" />
+		-->
+
+		<field name="borderThickness" type="int" />
+		<field name="borderColor" type="color" />
+		<field name="barLocation" type="int" />
+		<field name="barWidth" type="int" />
+		<field name="barHeight" type="int" />
+		<field name="barColor" type="color" />
+		<field name="barOffsetX" type="int" />
+		<field name="barOffsetY" type="int" />
+		<field name="barBackgroundColor" type="color" />
+	</config>
+</game-data>
