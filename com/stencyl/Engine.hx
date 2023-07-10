@@ -3458,6 +3458,14 @@ class Engine
 			shaders[0].capture();
 		}
 		#end
+
+		/*for(l in interactiveLayers)
+		{
+			l.overlay.graphics.clip(0, 0, screenWidth * SCALE, screenHeight * SCALE);
+		}
+		debugLayer.graphics.clip(0, 0, screenWidth * SCALE, screenHeight * SCALE);
+		hudLayer.overlay.graphics.clip(0, 0, screenWidth * SCALE, screenHeight * SCALE);
+		transitionLayer.graphics.clip(0, 0, screenWidth * SCALE, screenHeight * SCALE);*/
      }
 	
 	//*-----------------------------------------------
