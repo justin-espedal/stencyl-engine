@@ -406,6 +406,24 @@ class Input
 		controlReleased(_controlMap.get(controlName));
 	}
 
+	public static function simulateMousePress()
+	{
+		onMouseDown(null);
+	}
+
+	public static function simulateMouseRelease()
+	{
+		onMouseUp(null);
+	}
+
+	public static function moveMouse(x:Int, y:Int)
+	{
+		Lib.application.window.warpMouse(
+			Math.round((x * Engine.engine.root.scaleX) + Engine.engine.root.x),
+			Math.round((y * Engine.engine.root.scaleY) + Engine.engine.root.y)
+		);
+	}
+
 	@:deprecated("Gamepads no longer need to be manually enabled.") public static function enableJoystick() {}
 
 	public static function enable()
@@ -750,6 +768,18 @@ class Input
 		{
 			mouseDown = true;
 			mousePressed = true;
+
+			if(Engine.engine.mousePollOccurred)
+			{
+				//Due to order of execution, events will never get thrown since the
+				//pressed/released flag is reset before the event checker sees it. So
+				//throw the event immediately.
+
+				Script.mpx = Std.int(mouseX / Engine.SCALE);
+				Script.mpy = Std.int(mouseY / Engine.SCALE);
+				
+				Engine.engine.whenMousePressed.dispatch();
+			}
 		}
 	}
 
@@ -762,8 +792,23 @@ class Input
 		mouseY = (Engine.stage.mouseY - Engine.screenOffsetY) / Engine.screenScaleY;
 		#end
 		
-		mouseDown = false;
-		mouseReleased = true;
+		if(mouseDown)
+		{
+			mouseDown = false;
+			mouseReleased = true;
+
+			if(Engine.engine.mousePollOccurred)
+			{
+				//Due to order of execution, events will never get thrown since the
+				//pressed/released flag is reset before the event checker sees it. So
+				//throw the event immediately.
+
+				Script.mrx = Std.int(mouseX / Engine.SCALE);
+				Script.mry = Std.int(mouseY / Engine.SCALE);
+				
+				Engine.engine.whenMouseReleased.dispatch();
+			}
+		}
 	}
 
 	private static function onRightMouseDown(e:MouseEvent)
@@ -777,8 +822,11 @@ class Input
 	
 	private static function onRightMouseUp(e:MouseEvent)
 	{
-		rightMouseDown = false;
-		rightMouseReleased = true;
+		if(rightMouseDown)
+		{
+			rightMouseDown = false;
+			rightMouseReleased = true;
+		}
 	}
 	
 	private static function onMiddleMouseDown(e:MouseEvent)
@@ -792,8 +840,11 @@ class Input
 	
 	private static function onMiddleMouseUp(e:MouseEvent)
 	{
-		middleMouseDown = false;
-		middleMouseReleased = true;
+		if(middleMouseDown)
+		{
+			middleMouseDown = false;
+			middleMouseReleased = true;
+		}
 	}
 	
 	private static function onMouseWheel(e:MouseEvent)

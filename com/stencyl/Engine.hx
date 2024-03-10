@@ -366,6 +366,7 @@ class Engine
 	private var disableCollisionList:Array<Actor>;
 
 	public var keyPollOccurred:Bool = false;
+	public var mousePollOccurred:Bool = false;
 	
 	public var whenKeyPressedEvents:EventMap<String, (pressed:Bool, released:Bool)->Void>;
 	public var whenAnyKeyPressed:Event<(event:KeyboardEvent)->Void>;
@@ -2660,6 +2661,7 @@ class Engine
 				whenMouseDragged.dispatch();
 			}
 		}
+		mousePollOccurred = true;
 		
 		//Update Timed Tasks
 		var i = 0;
@@ -2797,6 +2799,7 @@ class Engine
 		}
 
 		keyPollOccurred = false;
+		mousePollOccurred = false;
 			
 		for(n in 0...disableCollisionList.length)
 		{
