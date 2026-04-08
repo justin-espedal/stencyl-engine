@@ -26,14 +26,7 @@ class EventDispatcher
 					var posinfo = $event.posInfos[$event._dispatchIndex];
 					com.stencyl.utils.Log.verbose("Call event from: " + posinfo.fileName + ":" + posinfo.lineNumber);
 					#end
-					try
-					{
-						$event.listeners[$event._dispatchIndex]($a{args});
-					}
-					catch(e: #if (haxe_ver >= 4.1) haxe.Exception #else Dynamic #end )
-					{
-						com.stencyl.utils.Log.fullError(e.message, e);
-					}
+					$event.listeners[$event._dispatchIndex]($a{args});
 					++$event._dispatchIndex;
 				}
 			}
