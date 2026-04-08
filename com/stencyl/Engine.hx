@@ -2928,11 +2928,22 @@ class Engine
 		}
 	}
 	
+	#if testing
+	private static var speedToggle = false;
+	#end
+	
 	private function postUpdate(currTime:Float)
 	{
 		while(acc > STEP_SIZE)
 		{
 			update(STEP_SIZE);
+			#if testing
+			@:privateAccess if(Input._key[openfl.ui.Keyboard.NUMPAD_ADD]) speedToggle = true;
+			@:privateAccess if(Input._key[openfl.ui.Keyboard.NUMPAD_SUBTRACT]) speedToggle = false;
+			if(speedToggle)
+				acc -= STEP_SIZE / 5;
+			else
+			#end
 			acc -= STEP_SIZE;
 			Input.update();
 		}
