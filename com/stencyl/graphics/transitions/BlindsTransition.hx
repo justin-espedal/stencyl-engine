@@ -31,7 +31,10 @@ class BlindsTransition extends Transition
 		this.color = color;
 		this.direction = direction;
 		this.numBlinds = numBlinds;
-		
+	}
+	
+	override public function start()
+	{
 		if(direction == Transition.IN)
 		{
 			beginBlindWidth = (Engine.screenWidth * Engine.SCALE) / numBlinds; 
@@ -46,11 +49,9 @@ class BlindsTransition extends Transition
 		{
 			Log.error("Invalid transition direction: " + direction);
 			complete = true;
+			return;
 		}
-	}
-	
-	override public function start()
-	{
+
 		active = true;
 		
 		blindRect = new Rectangle(0, 0, beginBlindWidth, Engine.screenHeight * Engine.SCALE);

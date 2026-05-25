@@ -74,4 +74,8 @@ class Transition
 	{
 		return duration;
 	}
+
+	public function memoOldScene()
+	{
+	}
 }

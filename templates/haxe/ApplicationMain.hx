@@ -221,6 +221,10 @@ using StringTools;
 		Sys.putEnv("SDL_IOS_ORIENTATIONS", orientation);
 		#end
 
+		#if linux
+		Sys.putEnv("SDL_VIDEODRIVER", "wayland,x11");
+		#end
+
 		app = new Application ();
 		
 		ManifestResources.init (config);

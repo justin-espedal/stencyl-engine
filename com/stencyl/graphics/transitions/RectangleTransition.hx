@@ -32,7 +32,10 @@ class RectangleTransition extends Transition
 			
 		this.color = color;
 		this.direction = direction;
-		
+	}
+	
+	override public function start()
+	{
 		if(direction == Transition.IN)
 		{
 			beginWidth = 0;
@@ -51,11 +54,9 @@ class RectangleTransition extends Transition
 		{
 			Log.error("Invalid transition direction: " + direction);
 			complete = true;
+			return;
 		}
-	}
-	
-	override public function start()
-	{
+
 		active = true;		
 		size = new TweenFloat2();
 			

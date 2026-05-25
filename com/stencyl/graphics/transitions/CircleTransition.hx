@@ -30,7 +30,10 @@ class CircleTransition extends Transition
 		
 		this.color = color;
 		this.direction = direction;
-		
+	}
+	
+	override public function start()
+	{
 		if(direction == Transition.IN)
 		{
 			beginRadius = 0; 
@@ -42,10 +45,7 @@ class CircleTransition extends Transition
 			beginRadius = Std.int(Math.ceil(Point.distance(new Point(0, 0), new Point(Engine.screenWidthHalf * Engine.SCALE, Engine.screenHeightHalf * Engine.SCALE))));
 			endRadius = 0;
 		}
-	}
-	
-	override public function start()
-	{
+		
 		active = true;
 			
 		s = new Shape();

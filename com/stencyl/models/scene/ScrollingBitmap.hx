@@ -36,30 +36,21 @@ class ScrollingBitmap extends #if use_actor_tilemap TileContainer #else Sprite #
 	
 	public var backgroundID:Int;
 	public var repeats:Bool;
+
+	public var img:BitmapData;
 	
 	public function new(img:BitmapData, dx:Float, dy:Float, px:Float=0, py:Float=0, ID:Int=0, repeats:Bool = true) 
 	{
 		super();
 		
 		running = true;
+		this.img = img;
 		this.repeats = repeats;
 		
 		cacheWidth = img.width;
 		cacheHeight = img.height;
         
-		tiles = createTiles(img, Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
-		
-		for(line in tiles)
-		{
-			for(tile in line)
-			{
-				#if use_actor_tilemap
-				addTile(tile);
-				#else
-				addChild(tile);
-				#end
-			}
-		}
+		createTiles(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
 		
 		xP = 0;
 		yP = 0;
@@ -82,8 +73,16 @@ class ScrollingBitmap extends #if use_actor_tilemap TileContainer #else Sprite #
 		backgroundID = ID;
 	}
 	
-	public static function createTiles(img:BitmapData, screenWidth:Int, screenHeight:Int):Array<Array<#if use_actor_tilemap Tile #else Bitmap #end>>
+	public function createTiles(screenWidth:Int, screenHeight:Int)
 	{
+		#if use_actor_tilemap
+		if(numTiles > 0)
+			removeTiles();
+		#else
+		if(numChildren > 0)
+			removeChildren();
+		#end
+
 		var tw:Float = img.width;
 		var th:Float = img.height;
 		
@@ -91,7 +90,7 @@ class ScrollingBitmap extends #if use_actor_tilemap TileContainer #else Sprite #
 		var ts = TileSource.fromBitmapData(img);
 		#end
 
-		var tiles = [];
+		tiles = [];
 		
 		for(yPos in 0...Math.ceil(screenHeight / th) + 1)
 		{
@@ -113,12 +112,32 @@ class ScrollingBitmap extends #if use_actor_tilemap TileContainer #else Sprite #
 			
 			tiles.push(line);
 		}
-		
-		return tiles;
+
+		for(line in tiles)
+		{
+			for(tile in line)
+			{
+				#if use_actor_tilemap
+				addTile(tile);
+				#else
+				addChild(tile);
+				#end
+			}
+		}
 	}
 	
 	public function setImage(img:BitmapData)
 	{
+		if(this.img.width != img.width || this.img.height != img.height)
+		{
+			this.img = img;
+			createTiles(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
+			resetPositions();
+			return;
+		}
+
+		this.img = img;
+
 		#if use_actor_tilemap
 		var ts = TileSource.fromBitmapData(img);
 		@:privateAccess for(tile in __tiles)
@@ -135,6 +154,12 @@ class ScrollingBitmap extends #if use_actor_tilemap TileContainer #else Sprite #
 			}
 		}
 		#end
+	}
+
+	public function updateScreen()
+	{
+		createTiles(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
+		resetPositions();
 	}
 	
 	public function update(x:Float, y:Float, elapsedTime:Float)

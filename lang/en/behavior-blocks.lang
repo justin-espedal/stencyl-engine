@@ -591,6 +591,9 @@ image.set.z2=send %1 %0 [i:draw]
 image.to.text=%0 as text [i:draw]
 image.from.text=%0 as image [i:draw]
 image.rgb=( red: %0 green: %1 blue: %2 ) as color
+# Shape
+shape.create=new shape
+shape.draw=draw a shape: %0
 # Sound
 ssound.texttosound=sound with name %0 [i:volume]
 ssound.play=play %0 [i:volume]
@@ -1045,6 +1048,7 @@ cat.image.display.z=Z-Order
 cat.image.display.props=Properties
 cat.image.display.tween=Tweening
 cat.image.display.trans=Transforms
+cat.shape.create=Create Shapes
 cat.message.actor.enable=Is Enabled?
 cat.message.actor.attr=For Actor
 cat.message.actor.send=For Actor

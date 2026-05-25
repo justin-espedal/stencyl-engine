@@ -9694,7 +9694,7 @@
     </block>
 
     <block tag="set-scalemode"
-           code="Config.scaleMode = #{0};"
+           code="Config.scaleMode = #{0};&#10;engine.reloadScreen();"
            spec="@scene.setscalemode"
            help="@scene.setscalemode.help"
            type="action"
@@ -9945,12 +9945,13 @@
 
     <block tag="draw-shape"
            code="g.beginDrawingShape(#{0});&#10;#{1}&#10;g.endDrawingShape();"
-           spec="draw a shape: %0"
+           spec="@shape.draw"
+           help="@shape.draw.help"
            type="wrapper"
            returns="void"
            category="drawing">
         <fields>
-            <anything order="0" />
+            <shape order="0" />
             <code-block order="1" />
         </fields>
         <context>
@@ -9960,14 +9961,12 @@
 
     <block tag="new-shape"
            code="new openfl.display.Shape()"
-           spec="new shape"
+           spec="@shape.create"
+           help="@shape.create.help"
            type="normal"
-           returns="anything"
+           returns="shape"
            category="drawing">
         <fields/>
-        <context>
-            <requiredContext type="has" value="g:com.stencyl.graphics.G" />
-        </context>
     </block>
 
     <block tag="set-color"

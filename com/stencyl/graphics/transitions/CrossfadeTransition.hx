@@ -24,13 +24,16 @@ class CrossfadeTransition extends Transition
 		
 		this.oldImg = oldImg;
 	}
+
+	override public function memoOldScene()
+	{
+		bitmap = new BitmapData(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
+		bitmap.draw(oldImg);
+	}
 	
 	override public function start()
 	{
 		active = true;
-				
-		bitmap = new BitmapData(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
-		bitmap.draw(oldImg);
 
 		rect = new Shape();
 		var g = rect.graphics;

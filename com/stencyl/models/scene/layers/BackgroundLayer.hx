@@ -235,6 +235,19 @@ class BackgroundLayer extends RegularLayer
 		isAnimated = model.frames.length > 1;
 		frameCount = model.frames.length;
 	}
+
+	public function updateScreen()
+	{
+		#if use_actor_tilemap
+		tilemap.width = Std.int(Engine.screenWidth * Engine.SCALE);
+		tilemap.height = Std.int(Engine.screenHeight * Engine.SCALE);
+		#end
+		if (isOfType(bgChild, ScrollingBitmap))
+		{
+			var bg = cast(bgChild, ScrollingBitmap);
+			bg.updateScreen();
+		}
+	}
 	
 	public function updateAnimation(elapsedTime:Float)
 	{

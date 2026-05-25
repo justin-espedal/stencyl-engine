@@ -26,6 +26,7 @@ class SlideTransition extends Transition
 	public var nsm_xy:TweenFloat2;
 	private var tx:Float;
 	private var ty:Float;
+	private var slideDirection:String;
 	
 	public static var SLIDE_UP:String = "up";
 	public static var SLIDE_DOWN:String = "down";
@@ -40,12 +41,23 @@ class SlideTransition extends Transition
 		
 		this.sceneSpr = sceneSpr;
 		this.sceneCol = sceneCol;
+		this.slideDirection = slideDirection;
 		
 		oldSceneMatrix = new Matrix();
 		newSceneMatrix = new Matrix();
 		tx = 0;
 		ty = 0;
-			
+	}
+
+	override public function memoOldScene()
+	{
+		oldBitmap = new BitmapData(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
+		oldBitmap.draw(sceneCol);
+		oldBitmap.draw(sceneSpr);
+	}
+	
+	override public function start()
+	{
 		if(slideDirection == SLIDE_UP)
 		{
 			newSceneMatrix.ty = -Engine.screenHeight * Engine.SCALE;
@@ -70,16 +82,10 @@ class SlideTransition extends Transition
 		{
 			Log.error("Invalid slide direction: " + slideDirection);
 			complete = true;
-		}		
-	}
-	
-	override public function start()
-	{
+			return;
+		}
+
 		active = true;
-		
-		oldBitmap = new BitmapData(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
-		oldBitmap.draw(sceneCol);
-		oldBitmap.draw(sceneSpr);
 		
 		newBitmap = new BitmapData(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));
 		drawBitmap = new BitmapData(Std.int(Engine.screenWidth * Engine.SCALE), Std.int(Engine.screenHeight * Engine.SCALE));

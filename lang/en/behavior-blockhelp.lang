@@ -494,6 +494,9 @@ image.set.z2.help=Sets drawing order within layer/actor for an image instance.
 image.to.text.help=Converts an image to text for future in-app use.
 image.from.text.help=Converts text back to an image. This takes time.
 image.rgb.help=Make a color from RGB. Fill in 0-255 for each channel.
+# Shape
+shape.create.help=Create a new shape to draw to.
+shape.draw.help=Draw onto a shape. Drawing lines/circles/rectangles/polygons should be done inside this block.
 # Sound
 ssound.texttosound.help=Gets a sound by name (using text).
 ssound.play.help=Plays the sound once.

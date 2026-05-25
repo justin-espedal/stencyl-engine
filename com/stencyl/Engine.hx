@@ -643,8 +643,27 @@ class Engine
 			}
 			
 			g.resetFont();
-			
+		}
+		if(screensizeUpdated || gameScaleUpdated)
+		{
 			moveCamera(camera.realX, camera.realY);
+		}
+		if(screensizeUpdated)
+		{
+			Utils.applyToAllChildren(root, function(obj) {
+
+				#if !use_tilemap
+				if(isOfType(obj, TileLayer))
+				{
+					cast(obj, TileLayer).expandBitmap();
+				}
+				#end
+				if(isOfType(obj, BackgroundLayer))
+				{
+					cast(obj, BackgroundLayer).updateScreen();
+				}
+
+			});
 		}
 
 		unzoomedScaleX = screenScaleX = root.scaleX;
@@ -1022,9 +1041,6 @@ class Engine
 			extension.initialize();
 		}
 		
-		//Now, let's start
-		//enter = new FadeInTransition(0.5);
-		//enter.start();
 		sceneToEnter = initSceneID;
 		
 		loadScene(initSceneID);
@@ -2017,23 +2033,28 @@ class Engine
 	
 	public function enterScene()
 	{
+		//Log.debug("Entering Scene " + sceneToEnter);
+
 		if(!enter.isComplete())
 		{
-			enter.start();
-			
-			if(leave != null)
-			{
-				leave.cleanup();
-			}
+			enter.memoOldScene();
 		}
-		
-		leave = null;
-		
-		//Log.debug("Entering Scene " + sceneToEnter);
 		
 		sceneInitialized = false;
 		cleanup();
 		loadScene(sceneToEnter);
+
+		if(!enter.isComplete())
+		{
+			enter.start();
+		}
+		
+		if(leave != null)
+		{
+			leave.cleanup();
+			leave = null;
+		}
+
 		sceneInitialized = true;
 	}
 	
