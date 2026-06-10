@@ -773,6 +773,10 @@ class G
 		shape = null;
 	}
 
+	#if use_actor_tilemap
+	private var dummyImg = new BitmapData(1, 1, true, 0);
+	#end
+
 	public function drawShape(shape:Shape)
 	{
 		#if !flash
@@ -784,11 +788,12 @@ class G
 		#end
 
 		#if use_actor_tilemap
-		var img:BitmapData = new BitmapData(Math.ceil(bounds.width), Math.ceil(bounds.height), true, 0);
-		img.draw(shape, new Matrix(1, 0, 0, 1, -bounds.x, -bounds.y));
-		var ts = TileSource.fromBitmapData(img);
+		dummyImg.draw(shape, new Matrix(1, 0, 0, 1, -bounds.x, -bounds.y));
+		@:privateAccess if(shape.graphics.__bitmap == null)
+			return;
+		@:privateAccess var ts = TileSource.fromBitmapData(shape.graphics.__bitmap);
 		var tile = new Tile();
-		tile.id = ts.tileID;
+		tile.id = TilesetUtils.getSubFrame(ts.tileset, ts.tileID, 0, 0, Math.ceil(bounds.width), Math.ceil(bounds.height));
 		tile.x = bounds.x;
 		tile.y = bounds.y;
 		tile.tileset = ts.tileset;
